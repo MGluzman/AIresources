@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tool Effectiveness Icebreaker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0; /* Light grey background for the whole page */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #a3a3a3; /* Updated to #a3a3a3 */
+            border: 8px solid black; /* Thick black border */
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 90%;
+            width: 800px; /* Max width for the game box */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            position: relative; /* For pop-up positioning */
+        }
+        canvas {
+            display: block;
+            background-color: #fff;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            max-width: 100%; /* Ensure canvas scales down */
+            height: auto; /* Maintain aspect ratio */
+        }
+        button {
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 10px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .spin-button {
+            background-color: #37a209; /* Changed to #37a209 */
+            color: white;
+            border: none;
+            padding: 12px 24px; /* Made 20% smaller */
+            font-size: 1.1rem; /* Made 20% smaller */
+        }
+        .spin-button:hover {
+            background-color: #2e8b07; /* Slightly darker for hover */
+        }
+        .answer-button {
+            background-color: #007BFF; /* Blue */
+            color: white;
+            border: none;
+            flex: 1; /* Distribute space evenly */
+            margin: 5px;
+            font-size: 1rem; /* Adjust for smaller buttons */
+        }
+        .answer-button:hover {
+            background-color: #0056b3;
+        }
+        .answer-buttons-container {
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+            justify-content: center;
+            width: 100%;
+            max-width: 600px; /* Limit width of answer buttons */
+        }
+        .scenario-card-overlay, .how-to-play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent overlay */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .scenario-card-overlay.active, .how-to-play-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .scenario-card, .how-to-play-card {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            font-size: 1.1rem;
+            color: #333;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            position: relative; /* For close button positioning */
+        }
+        .scenario-card-overlay.active .scenario-card, .how-to-play-overlay.active .how-to-play-card {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .scenario-card h3, .how-to-play-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        .scenario-card p, .how-to-play-card p {
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 14pt; /* Ensure text is at least 14pt */
+        }
+        .feedback-message {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-top: 15px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: none; /* Hidden by default */
+        }
+        .feedback-message.correct {
+            background-color: #d4edda; /* Light green */
+            color: #155724; /* Dark green */
+        }
+        .feedback-message.incorrect {
+            background-color: #f8d7da; /* Light red */
+            color: #721c24; /* Dark red */
+        }
+        .card-correct {
+            background-color: #d4edda !important; /* Force green */
+            color: #155724 !important;
+        }
+        .card-incorrect {
+            background-color: #f8d7da !important; /* Force red */
+            color: #721c24 !important;
+        }
+        .game-over-message {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .how-to-play-button {
+            position: absolute;
+            bottom: 15px; /* Position at the bottom */
+            right: 15px; /* Position at the right */
+            background-color: #007BFF; /* Blue */
+            color: white;
+            border: none;
+            border-radius: 8px; /* Slightly rounded corners for a button look */
+            padding: 6px 12px; /* Made smaller */
+            font-size: 0.9rem; /* Made smaller */
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 5; /* Above other elements but below overlay */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 100px; /* Ensure enough width for text */
+        }
+        .how-to-play-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .how-to-play-close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #333;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        .how-to-play-close-button:hover {
+            background-color: #eee;
+        }
+        .copyright-info {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            color: #333; /* Darker text for readability on light gray */
+            font-size: 0.75rem; /* Small letters */
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            z-index: 5;
+        }
+        .copyright-info .cc-icons i {
+            font-size: 1.2rem; /* Slightly larger icons */
+            margin-right: 3px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 15px;
+                width: 100%;
+            }
+            canvas {
+                width: 250px; /* Smaller canvas on mobile */
+                height: 250px;
+            }
+            button {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+            .answer-button {
+                font-size: 0.9rem;
+                margin: 3px;
+                padding: 8px 15px;
+            }
+            .scenario-card, .how-to-play-card {
+                padding: 20px;
+                font-size: 1rem;
+            }
+            .scenario-card h3, .how-to-play-card h3 {
+                font-size: 1.3rem;
+            }
+            .scenario-card p, .how-to-play-card p {
+                font-size: 14pt; /* Ensure text is at least 14pt */
+            }
+            .feedback-message {
+                font-size: 1.1rem;
+                padding: 8px 15px;
+            }
+            .game-over-message {
+                font-size: 1.2rem;
+            }
+            .how-to-play-button {
+                width: auto; /* Allow width to adjust to text */
+                height: auto; /* Allow height to adjust to text */
+                font-size: 0.8rem; /* Even smaller on mobile */
+                top: auto; /* Remove top positioning */
+                bottom: 10px; /* Adjust bottom for smaller screens */
+                right: 10px; /* Adjust right for smaller screens */
+                padding: 5px 10px;
+            }
+            .copyright-info {
+                bottom: 10px;
+                left: 10px;
+                font-size: 0.6rem; /* Even smaller on mobile */
+            }
+            .copyright-info .cc-icons i {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-6 text-center">Can I use an AI tool effectively for this?</h1>
+        <button id="howToPlayButton" class="how-to-play-button">How to Play</button>
+        <canvas id="wheelCanvas"></canvas>
+        <button id="spinButton" class="spin-button">Spin the Wheel!</button>
+        <div id="gameOverMessage" class="game-over-message hidden">
+            All scenarios completed! Great job!
+            <button id="resetGameButton" class="spin-button mt-4">Play Again</button>
+        </div>
+
+        <div class="copyright-info">
+            <div class="cc-icons">
+                <i class="fab fa-creative-commons"></i>
+                <i class="fab fa-creative-commons-by"></i>
+                <i class="fab fa-creative-commons-sa"></i>
+                <i class="fab fa-creative-commons-nc"></i>
+            </div>
+            <span>Created by Mariya Gluzman with Gemini 2.5 Flash</span>
+        </div>
+
+        <div id="scenarioCardOverlay" class="scenario-card-overlay">
+            <div id="scenarioCard" class="scenario-card">
+                <h3 id="scenarioTitle">Scenario:</h3>
+                <p id="scenarioText"></p>
+                <div class="answer-buttons-container">
+                    <button id="answerNoAI" class="answer-button">No effective AI application</button>
+                    <button id="answerAI" class="answer-button">AI can be used effectively</button>
+                </div>
+                <div id="feedbackMessage" class="feedback-message mt-4"></div>
+                <button id="nextScenarioButton" class="spin-button mt-4 hidden">Spin Again</button>
+            </div>
+        </div>
+
+        <div id="howToPlayOverlay" class="how-to-play-overlay">
+            <div id="howToPlayCard" class="how-to-play-card">
+                <button id="howToPlayCloseButton" class="how-to-play-close-button">&times;</button>
+                <h3>How to Play:</h3>
+                <p>
+                    Welcome to the AI Tool Effectiveness Icebreaker!<br><br>
+                    1. Click 'Spin the Wheel!' to get a scenario.<br>
+                    2. A card will pop up with a scenario. Read it carefully.<br>
+                    3. Choose one of two answers: 'No effective AI application' or 'AI can be used effectively'.<br>
+                    4. Get instant feedback: 'Correct!' (ding) or 'Incorrect!' (buzz).<br>
+                    5. The used scenario is removed. Click 'Spin Again' to continue.<br>
+                    6. Play until all scenarios are gone, or stop anytime!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game Data
+        const allScenarios = [
+            { id: 1, color: '#CD5C5C', name: 'Brick Red', text: 'You would like to create auto-graded pop quizzes for each chapter of the textbook.', correctAnswer: 'AI can be used effectively', used: false },
+            { id: 2, color: '#00FFFF', name: 'Cyan', text: 'You want to add scaffolding and checklists to a major course project.', correctAnswer: 'AI can be used effectively', used: false },
+            { id: 3, color: '#6B8E23', name: 'Avocado Green', text: 'You need to create an assessment plan for a new course.', correctAnswer: 'AI can be used effectively', used: false },
+            { id: 4, color: '#C8A2C8', name: 'Lilac', text: 'You need to know for sure whether students used AI unethically to cheat on their assignments.', correctAnswer: 'No effective AI application', used: false },
+            { id: 5, color: '#FFF000', name: 'Banana Yellow', text: 'You want to break up a major writing assignment into multiple scaffolded phases.', correctAnswer: 'AI can be used effectively', used: false },
+            { id: 6, color: '#FF69B4', name: 'Rose Pink', text: 'You need to convert a holistic grading rubric to analytic rubric with weighted grades.', correctAnswer: 'AI can be used effectively', used: false },
+            { id: 7, color: '#4169E1', name: 'Medium Blue', text: 'You want to create a course timeline from your available course content.', correctAnswer: 'AI can be used effectively', used: false },
+            { id: 8, color: '#EE82EE', name: 'Violet', text: 'You want to gamify some student activities.', correctAnswer: 'AI can be used effectively', used: false },
+        ];
+
+        let availableScenarios = [...allScenarios]; // Copy for mutable game state
+        let currentScenario = null;
+
+        // Canvas Elements
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const spinButton = document.getElementById('spinButton');
+        const scenarioCardOverlay = document.getElementById('scenarioCardOverlay');
+        const scenarioCard = document.getElementById('scenarioCard');
+        const scenarioTextElement = document.getElementById('scenarioText');
+        const answerNoAIButton = document.getElementById('answerNoAI');
+        const answerAIButton = document.getElementById('answerAI');
+        const feedbackMessageElement = document.getElementById('feedbackMessage');
+        const nextScenarioButton = document.getElementById('nextScenarioButton');
+        const gameOverMessage = document.getElementById('gameOverMessage');
+        const resetGameButton = document.getElementById('resetGameButton');
+
+        // How to Play elements
+        const howToPlayButton = document.getElementById('howToPlayButton');
+        const howToPlayOverlay = document.getElementById('howToPlayOverlay');
+        const howToPlayCloseButton = document.getElementById('howToPlayCloseButton');
+
+        // Wheel properties
+        const wheelRadius = 200;
+        const centerX = wheelRadius;
+        const centerY = wheelRadius;
+        let startAngle = 0;
+        let arc = 0;
+        let spinTimeout = null;
+        let spinAngleStart = 0;
+        let spinTime = 0;
+        let spinTimeTotal = 0;
+        let spinDuration = 5000; // 5 seconds spin duration
+        let selectedWedgeIndex = -1;
+
+        // Audio setup using Tone.js
+        const dingSynth = new Tone.Synth().toDestination();
+        const buzzSynth = new Tone.Synth().toDestination();
+
+        // Initialize Tone.js context on first user interaction
+        let audioContextInitialized = false;
+        document.addEventListener('click', () => {
+            if (!audioContextInitialized) {
+                Tone.start();
+                audioContextInitialized = true;
+                console.log('AudioContext initialized');
+            }
+        }, { once: true });
+
+
+        // Function to draw the wheel
+        function drawWheel() {
+            // Adjust canvas size for responsiveness
+            const containerWidth = canvas.parentElement.clientWidth;
+            const size = Math.min(wheelRadius * 2, containerWidth * 0.8); // Max 80% of container width, or 400px
+            canvas.width = size;
+            canvas.height = size;
+            const currentCenterX = size / 2;
+            const currentCenterY = size / 2;
+            const currentRadius = size / 2;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+
+            if (availableScenarios.length === 0) {
+                // Draw a blank wheel or a "Game Over" message on the canvas if no wedges left
+                ctx.beginPath();
+                ctx.arc(currentCenterX, currentCenterY, currentRadius, 0, 2 * Math.PI);
+                ctx.fillStyle = '#ccc'; // Grey for empty wheel
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#333';
+                ctx.stroke();
+
+                ctx.fillStyle = '#333';
+                ctx.font = `bold ${currentRadius * 0.1}px Inter`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('Game Over!', currentCenterX, currentCenterY);
+                return;
+            }
+
+            arc = 2 * Math.PI / availableScenarios.length;
+
+            for (let i = 0; i < availableScenarios.length; i++) {
+                const angle = startAngle + i * arc;
+                ctx.beginPath();
+                ctx.arc(currentCenterX, currentCenterY, currentRadius, angle, angle + arc, false);
+                ctx.lineTo(currentCenterX, currentCenterY);
+                ctx.fillStyle = availableScenarios[i].color;
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#fff'; // White border for wedges
+                ctx.stroke();
+
+                // Draw text on wedges (optional, but good for visual clarity)
+                ctx.save();
+                ctx.translate(currentCenterX, currentCenterY);
+                ctx.rotate(angle + arc / 2);
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#333';
+                ctx.font = `${currentRadius * 0.08}px Inter`; // Smaller font for wedge text
+                ctx.fillText(availableScenarios[i].name, currentRadius * 0.8, 0); // Position text
+                ctx.restore();
+            }
+
+            // Draw the pointer (triangle at the top)
+            ctx.beginPath();
+            ctx.fillStyle = '#333';
+            ctx.moveTo(currentCenterX - 10, 0);
+            ctx.lineTo(currentCenterX + 10, 0);
+            ctx.lineTo(currentCenterX, 20);
+            ctx.fill();
+        }
+
+        // Function to start the spin animation
+        function spin() {
+            if (availableScenarios.length === 0) {
+                showGameOver();
+                return;
+            }
+
+            spinButton.disabled = true;
+            nextScenarioButton.classList.add('hidden');
+            feedbackMessageElement.style.display = 'none';
+            scenarioCard.classList.remove('card-correct', 'card-incorrect');
+
+            // Randomly pick an index from available scenarios
+            selectedWedgeIndex = Math.floor(Math.random() * availableScenarios.length);
+            currentScenario = availableScenarios[selectedWedgeIndex];
+
+            // Calculate target angle to stop on the selected wedge
+            // The wheel spins multiple times before stopping
+            const totalRotations = 5; // Spin at least 5 full rotations
+            const targetAngleOffset = (availableScenarios.length - selectedWedgeIndex - 0.5) * arc; // Center the wedge
+            const targetAngle = (totalRotations * 2 * Math.PI) + targetAngleOffset;
+
+            spinAngleStart = startAngle;
+            spinTime = 0;
+            spinTimeTotal = spinDuration;
+
+            // Animation loop
+            requestAnimationFrame(animateSpin);
+        }
+
+        // Animation loop for spinning
+        function animateSpin(timestamp) {
+            if (!spinTime) spinTime = timestamp;
+            const elapsed = timestamp - spinTime;
+            const progress = Math.min(elapsed / spinTimeTotal, 1);
+
+            // Ease out cubic function for deceleration
+            const easedProgress = 1 - Math.pow(1 - progress, 3);
+            startAngle = spinAngleStart + (2 * Math.PI * spinDuration / 1000 * easedProgress); // Adjust speed based on duration
+
+            drawWheel();
+
+            if (progress < 1) {
+                spinTimeout = requestAnimationFrame(animateSpin);
+            } else {
+                stopSpin();
+            }
+        }
+
+        // Function to stop the spin and show result
+        function stopSpin() {
+            cancelAnimationFrame(spinTimeout);
+            spinButton.disabled = false;
+            showScenarioCard();
+        }
+
+        // Function to display the scenario card
+        function showScenarioCard() {
+            scenarioTextElement.textContent = currentScenario.text;
+            feedbackMessageElement.textContent = '';
+            feedbackMessageElement.style.display = 'none';
+            answerNoAIButton.disabled = false;
+            answerAIButton.disabled = false;
+            nextScenarioButton.classList.add('hidden');
+            scenarioCardOverlay.classList.add('active');
+        }
+
+        // Handle answer selection
+        function handleAnswer(selectedAnswer) {
+            answerNoAIButton.disabled = true;
+            answerAIButton.disabled = true;
+
+            const isCorrect = (selectedAnswer === currentScenario.correctAnswer);
+
+            if (isCorrect) {
+                dingSynth.triggerAttackRelease('C5', '8n'); // Play a ding sound
+                feedbackMessageElement.textContent = 'Correct!';
+                feedbackMessageElement.classList.remove('incorrect');
+                feedbackMessageElement.classList.add('correct');
+                scenarioCard.classList.remove('card-incorrect');
+                scenarioCard.classList.add('card-correct');
+            } else {
+                buzzSynth.triggerAttackRelease('C2', '8n'); // Play a buzz sound
+                feedbackMessageElement.textContent = 'Incorrect!';
+                feedbackMessageElement.classList.remove('correct');
+                feedbackMessageElement.classList.add('incorrect');
+                scenarioCard.classList.remove('card-correct');
+                scenarioCard.classList.add('card-incorrect');
+            }
+            feedbackMessageElement.style.display = 'block';
+
+            // Mark scenario as used
+            const indexToRemove = availableScenarios.findIndex(s => s.id === currentScenario.id);
+            if (indexToRemove !== -1) {
+                availableScenarios.splice(indexToRemove, 1);
+            }
+
+            if (availableScenarios.length > 0) {
+                nextScenarioButton.textContent = 'Spin Again';
+                nextScenarioButton.classList.remove('hidden');
+            } else {
+                nextScenarioButton.textContent = 'Finish Game'; // Or hide and show game over
+                nextScenarioButton.classList.remove('hidden');
+            }
+        }
+
+        // Function to show game over message
+        function showGameOver() {
+            spinButton.classList.add('hidden');
+            gameOverMessage.classList.remove('hidden');
+            drawWheel(); // Redraw the empty wheel
+        }
+
+        // Function to reset the game
+        function resetGame() {
+            availableScenarios = [...allScenarios]; // Reset to all scenarios
+            availableScenarios.forEach(s => s.used = false); // Ensure 'used' flag is reset if it was ever used
+            currentScenario = null;
+            spinButton.classList.remove('hidden');
+            gameOverMessage.classList.add('hidden');
+            scenarioCardOverlay.classList.remove('active');
+            drawWheel();
+        }
+
+        // How to Play functions
+        function showHowToPlay() {
+            howToPlayOverlay.classList.add('active');
+        }
+
+        function hideHowToPlay() {
+            howToPlayOverlay.classList.remove('active');
+        }
+
+        // Event Listeners
+        spinButton.addEventListener('click', spin);
+        answerNoAIButton.addEventListener('click', () => handleAnswer('No effective AI application'));
+        answerAIButton.addEventListener('click', () => handleAnswer('AI can be used effectively'));
+        nextScenarioButton.addEventListener('click', () => {
+            scenarioCardOverlay.classList.remove('active');
+            if (availableScenarios.length === 0) {
+                showGameOver();
+            } else {
+                drawWheel(); // Redraw wheel with removed wedge
+            }
+        });
+        resetGameButton.addEventListener('click', resetGame);
+        howToPlayButton.addEventListener('click', showHowToPlay);
+        howToPlayCloseButton.addEventListener('click', hideHowToPlay);
+
+
+        // Initial draw and resize listener
+        window.addEventListener('load', drawWheel);
+        window.addEventListener('resize', drawWheel);
+
+        // Initial check for game over state if loaded with no scenarios
+        if (availableScenarios.length === 0) {
+            showGameOver();
+        }
+    </script>
+</body>
+</html>
