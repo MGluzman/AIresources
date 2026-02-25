@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Wiz Quiz</title>
+    <style>
+        :root {
+            --merlot: #722f37;
+            --bg-color: #a3a3a3;
+            --box-bg: #e2e8f0;
+            --grass-green: #7cfc00;
+            --selected-gray: #d1d5db;
+        }
+        body { 
+            background-color: var(--bg-color); 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+        }
+        #game-container { 
+            background: var(--box-bg); 
+            border: 5px solid black; 
+            padding: 2.5rem; 
+            width: 90%; 
+            max-width: 650px; 
+            text-align: center; 
+            box-shadow: 12px 12px 0px black; 
+            position: relative; 
+            min-height: 480px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #flash-msg {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            right: 0;
+            font-size: 2.2rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .flash-active { opacity: 1 !important; }
+        
+        #welcome-screen h1 { font-size: 3.5rem; margin: 0; letter-spacing: -2px; color: var(--merlot); }
+        #welcome-screen p { font-size: 1.2rem; margin-bottom: 2rem; font-weight: 500; }
+        
+        .merlot-btn { 
+            background: var(--merlot); 
+            color: white;
+            border: 4px solid black; 
+            padding: 15px 50px; 
+            font-size: 1.5rem; 
+            font-weight: 900; 
+            cursor: pointer; 
+            box-shadow: 6px 6px 0px black;
+            text-transform: uppercase;
+            transition: 0.1s;
+        }
+        .merlot-btn:hover { background: #5a252c; transform: translate(-2px, -2px); box-shadow: 8px 8px 0px black;}
+        .merlot-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px black; }
+
+        #stats-bar { 
+            display: none; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-weight: bold; 
+            font-size: 1.2rem; 
+            margin-bottom: 1rem; 
+            border-bottom: 3px solid black; 
+            padding-bottom: 10px; 
+            margin-top: 35px;
+        }
+        #star-tracker { color: #ffd700; font-size: 1.8rem; text-shadow: 1px 1px 0px black; min-width: 120px;}
+        #timer { color: #b22222; font-family: monospace; font-size: 1.5rem; }
+        
+        #game-content { display: none; }
+        .instruction-header { color: var(--merlot); text-transform: uppercase; margin: 0; font-size: 1.8rem; }
+        .instruction-sub { color: black; font-size: 0.95rem; margin-bottom: 20px; font-weight: 500; }
+
+        .card { 
+            display: block; 
+            width: 100%; 
+            margin: 12px 0; 
+            padding: 20px; 
+            border: 3px solid black; 
+            background: #fff; 
+            cursor: pointer; 
+            font-size: 1.1rem; 
+            text-align: left; 
+            box-shadow: 4px 4px 0px black; 
+            transition: 0.1s; 
+            box-sizing: border-box;
+        }
+        .card:hover:not(:disabled) { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px black; }
+        
+        .selected-item { background: var(--selected-gray) !important; }
+        .correct-border { border: 6px solid green !important; }
+        .incorrect-border { border: 6px solid red !important; }
+        .correct-reveal { background: green !important; color: white !important; }
+        
+        #next-btn { display: none; margin: 20px auto 0 auto; }
+        #final-action-area { display: none; margin-top: 20px; }
+        .game-over-text { color: var(--merlot); font-size: 2.2rem; font-weight: 900; text-transform: uppercase; margin: 0; }
+        
+        #modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); z-index: 100; justify-content: center; align-items: center; }
+        #modal-content { background: white; border: 5px solid black; padding: 2rem; max-width: 400px; text-align: left; }
+        .help-link { margin-top: 20px; display: none; cursor: pointer; text-decoration: underline; font-weight: bold; }
+        .restart-link { margin-top: 10px; display: inline-block; cursor: pointer; text-decoration: underline; font-weight: bold; color: #444; font-size: 1.1rem;}
+        
+        .hidden { display: none !important; }
+        .critical { color: white !important; background: #b22222; padding: 0 5px; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="flash-msg"></div>
+
+    <div id="welcome-screen">
+        <h1>AI WIZ QUIZ</h1>
+        <p>Can you spot the lie in 60 seconds?</p>
+        <button class="merlot-btn" onclick="startGame()">Let's Play</button>
+    </div>
+
+    <div id="stats-bar">
+        <div>RD <span id="round-num">1</span>/5</div>
+        <div id="star-tracker"></div>
+        <div id="timer">60s</div>
+    </div>
+
+    <div id="game-content">
+        <h2 class="instruction-header">Spot the Lie</h2>
+        <p class="instruction-sub">Click on the statement you suspect to be false.</p>
+        <div id="options-space"></div>
+        <button id="next-btn" class="merlot-btn" onclick="nextRound()">Next Round</button>
+        <div id="final-action-area">
+            <p class="game-over-text">Game Over</p>
+            <div class="restart-link" onclick="location.reload()">Play again?</div>
+        </div>
+    </div>
+
+    <div id="help-trigger" class="help-link" onclick="toggleModal(true)">How to play</div>
+</div>
+
+<div id="modal-overlay" onclick="toggleModal(false)">
+    <div id="modal-content" onclick="event.stopPropagation()">
+        <h2 style="color: var(--merlot);">Instructions</h2>
+        <ul>
+            <li>There are <strong>5 rounds</strong>.</li>
+            <li>Identify the <strong>1 Lie</strong> among 2 Truths.</li>
+            <li>You have <strong>60 seconds</strong> per round.</li>
+            <li>Correct identification earns a ⭐.</li>
+        </ul>
+        <button onclick="toggleModal(false)" style="width:100%; padding:10px; border:3px solid black; background:var(--merlot); color:white; font-weight:bold; cursor:pointer;">GOT IT</button>
+    </div>
+</div>
+
+<script>
+    const truths = ["Specialized AI is more accurate than human doctors at spotting early-stage breast cancer.","Many companies use AI to assess job candidates’ emotional intelligence and personality traits.","Many mental health institutions offer counseling and crisis support through AI-powered chatbots.","Hotel managers use AI platforms to predict guest needs and automate staffing levels.","Professional software developers turn to AI to write or suggest more than half of their code.","Professional coaches use AI to predict an athlete’s injury risk by analyzing their body movements.","Major stores use AI to make decisions about where to move products before they are bought.","Some companies use AI to analyze the 'sentiment' and 'engagement' of employees during video meetings.","Most financial analysts turn to AI to inform their investment advice and market forecasts.","Many news outlets use AI to generate local news and sports reports without human writers.","Researchers use specialized AI tools to visualize connections and citations between thousands of papers.","Libraries are debating the ethical impact of AI companies using copyrighted books for training without permission.","Scientists use AI to 'read' and reconstruct ancient, damaged scrolls too fragile for humans to unroll.","Major AI models are trained on massive amounts of data that likely violated the copyright of millions of authors and creators.","Professionals in many fields report 'skill atrophy,' or a declining ability to perform core tasks without AI assistance."];
+    const lies = ["AI hiring tools are naturally 'fair' because mathematical code cannot contain human biases.","AI has officially replaced the majority of entry-level office jobs in the U.S. as of 2026.","In the U.S., an AI can be legally listed as the sole author or inventor on a patent.","If an AI makes a medical mistake, the software company—not the hospital—is legally responsible.","Most major airlines have transitioned to 'pilotless' flights controlled entirely by AI.","If an AI provides a working DOI number or hyperlink, it guarantees the source is a legitimate paper.","AI search results are objectively neutral and free from the structural biases found in library catalogs.","Using an AI chatbot to answer a question uses significantly less energy than a traditional Google search.","AI models are 100% accurate because they only use verified, peer-reviewed data to learn new information."];
+
+    let currentRound = 0, stars = 0, timeLeft = 60, timerInterval, recentLies = [], currentChoices = [];
+
+    function startGame() {
+        document.getElementById('welcome-screen').style.display = 'none';
+        document.getElementById('stats-bar').style.display = 'flex';
+        document.getElementById('game-content').style.display = 'block';
+        document.getElementById('help-trigger').style.display = 'inline-block';
+        nextRound();
+    }
+
+    function toggleModal(show) { document.getElementById('modal-overlay').style.display = show ? 'flex' : 'none'; }
+
+    function triggerFlash(text, color) {
+        const el = document.getElementById('flash-msg');
+        el.innerText = text;
+        el.style.color = color;
+        el.classList.add('flash-active');
+        setTimeout(() => { el.classList.remove('flash-active'); }, 3000);
+    }
+
+    function resetAndStartTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 60;
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+            if (timeLeft <= 10) document.getElementById('timer').classList.add('critical');
+            if (timeLeft <= 0) handleTimeOut();
+        }, 1000);
+    }
+
+    function updateTimerDisplay() { document.getElementById('timer').innerText = timeLeft + "s"; }
+
+    function handleTimeOut() {
+        clearInterval(timerInterval);
+        triggerFlash("TIME EXPIRED!", "#722f37");
+        revealAnswers(null);
+    }
+
+    function revealAnswers(selectedIndex) {
+        const buttons = document.querySelectorAll('.card');
+        buttons.forEach((btn, index) => {
+            btn.disabled = true;
+            if (index === selectedIndex) {
+                btn.classList.add('selected-item');
+                btn.classList.add(currentChoices[index].isLie ? 'correct-border' : 'incorrect-border');
+            }
+            if (currentChoices[index].isLie && index !== selectedIndex) {
+                btn.classList.add('correct-reveal');
+            }
+        });
+
+        if (currentRound < 5) {
+            document.getElementById('next-btn').style.display = "inline-block";
+        } else {
+            document.getElementById('final-action-area').style.display = "block";
+            setTimeout(() => {
+                const finalMsg = stars >= 3 ? "AI WIZ CERTIFIED! ⭐" : "FINAL SCORE: " + stars + "/5";
+                triggerFlash(finalMsg, "#722f37");
+            }, 500);
+        }
+    }
+
+    function nextRound() {
+        currentRound++;
+        document.getElementById('timer').classList.remove('critical');
+        document.getElementById('round-num').innerText = currentRound;
+        document.getElementById('next-btn').style.display = "none";
+        
+        let selectedTruths = [...truths].sort(() => 0.5 - Math.random()).slice(0, 2);
+        let selectedLie;
+        do { selectedLie = lies[Math.floor(Math.random() * lies.length)]; } while (recentLies.includes(selectedLie));
+        recentLies.push(selectedLie);
+        if (recentLies.length > 5) recentLies.shift();
+
+        currentChoices = [{ text: selectedTruths[0], isLie: false }, { text: selectedTruths[1], isLie: false }, { text: selectedLie, isLie: true }].sort(() => 0.5 - Math.random());
+        renderOptions();
+        resetAndStartTimer();
+    }
+
+    function renderOptions() {
+        const container = document.getElementById('options-space');
+        container.innerHTML = "";
+        currentChoices.forEach((choice, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'card';
+            btn.innerText = choice.text;
+            btn.onclick = () => {
+                clearInterval(timerInterval);
+                if (choice.isLie) {
+                    stars++;
+                    document.getElementById('star-tracker').innerHTML = "⭐".repeat(stars);
+                    triggerFlash("CORRECT!", "green");
+                } else {
+                    triggerFlash("NOT QUITE", "red");
+                }
+                revealAnswers(i);
+            };
+            container.appendChild(btn);
+        });
+    }
+</script>
+</body>
+</html>
