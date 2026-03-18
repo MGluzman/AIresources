@@ -1,0 +1,568 @@
+an<!DOCTYPE html>
+<!--
+  Session Resource List: Unlikely Leaders: Shaping the Direction of AI on Our Campuses
+  Purpose: A curated reference page for conference presentation attendees
+  Author: Conference Presenters
+  Status: Draft — will be published as a live web page
+-->
+<html lang="en">
+<head>
+  <!--
+    Meta tags: Tell browsers and search engines about this page.
+    charset="UTF-8" ensures special characters (like accented letters) display correctly.
+    viewport ensures the page looks good on phones and tablets (responsive design).
+  -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resources | Unlikely Leaders: Shaping the Direction of AI on Our Campuses</title>
+
+  <style>
+    /*
+      CSS Reset & Base Styles
+      Purpose: Remove browser default inconsistencies and set a readable base font.
+      box-sizing: border-box makes width/padding math intuitive (padding is included in the element width).
+    */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif; /* Readable serif font for academic/professional tone */
+      font-size: 1rem;           /* 1rem = 16px by default — good base for readability */
+      line-height: 1.7;          /* Extra line spacing improves readability (WCAG 2.1 SC 1.4.8) */
+      color: #1a1a1a;            /* Near-black — high contrast against white (WCAG 2.1 SC 1.4.3) */
+      background-color: #fafaf8; /* Soft off-white reduces eye strain vs. pure white */
+      padding: 2rem 1rem;
+    }
+
+    /*
+      Page wrapper: Centers content and limits line length.
+      max-width: 780px is ideal for reading (50–75 characters per line per typography best practices).
+    */
+    .page-wrapper {
+      max-width: 780px;
+      margin: 0 auto; /* auto left/right centers the block */
+    }
+
+    /* ── Header ────────────────────────────────────────────────── */
+    header {
+      border-bottom: 3px solid #2c5f8a; /* Accent color — used consistently throughout */
+      padding-bottom: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .session-label {
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #2c5f8a;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      line-height: 1.3;
+      margin-top: 0.4rem;
+      color: #111;
+    }
+
+    /*
+      Presenter list: Displays each presenter on their own line.
+      list-style: none removes default bullets — presenters are not a bulleted list visually.
+    */
+    .presenter-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 0.75rem;
+      display: flex;             /* Lay items out in a row on wider screens */
+      flex-wrap: wrap;           /* Wrap to next line on narrow screens */
+      gap: 0.25rem 2rem;         /* Vertical gap | Horizontal gap between presenters */
+    }
+
+    .presenter-list li {
+      display: flex;
+      flex-direction: column;    /* Stack name above institution */
+      line-height: 1.4;
+    }
+
+    .presenter-name {
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #111;
+    }
+
+    .presenter-institution {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.85rem;
+      color: #555;
+      font-style: italic;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 0.85rem;
+      font-family: Arial, Helvetica, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Contact box ───────────────────────────────────────────── */
+    /*
+      A small bordered box in the header giving attendees a quick way
+      to reach each presenter. Sits below the presenter list.
+    */
+    .contact-box {
+      margin-top: 1.25rem;
+      border: 1px solid #b0cde0;
+      border-radius: 5px;
+      padding: 0.85rem 1.1rem;
+      background-color: #f0f6fb;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .contact-box-heading {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #2c5f8a;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Side-by-side layout for the two presenter contact cards */
+    .contact-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 2.5rem;
+    }
+
+    .contact-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 0.15rem;
+    }
+
+    .contact-detail {
+      font-size: 0.82rem;
+      color: #333;
+      line-height: 1.7;
+    }
+
+    .contact-detail a {
+      color: #1a5276;
+      text-decoration: underline;
+    }
+
+    .contact-detail a:hover,
+    .contact-detail a:focus {
+      color: #0a3d6b;
+      outline: 2px solid #2c5f8a;
+      outline-offset: 2px;
+    }
+
+    /* ── Section headings ──────────────────────────────────────── */
+    /*
+      Each <section> groups resources by theme.
+      h2 uses a left border "accent bar" — a simple visual cue without relying on color alone
+      (supports WCAG 2.1 SC 1.4.1 — use of color).
+    */
+    h2 {
+      font-size: 1.1rem;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #2c5f8a;
+      border-left: 4px solid #2c5f8a;
+      padding-left: 0.6rem;
+      margin-bottom: 1.25rem;
+    }
+
+    section {
+      margin-bottom: 2.5rem;
+    }
+
+    /*
+      Presenters' Work section: Visually distinct from the other sections
+      to highlight that these resources were created by the session speakers.
+      A light background with a stronger top border draws the eye first.
+    */
+    .section-presenters {
+      background-color: #eef4fb;   /* Soft blue tint — distinguishable but not jarring */
+      border-top: 4px solid #2c5f8a;
+      border-radius: 6px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    /* Override the h2 accent bar color inside this section to match the stronger border */
+    .section-presenters h2 {
+      color: #1a3d5c;
+      border-left-color: #1a3d5c;
+    }
+
+    /* Slightly soften the item dividers inside the highlighted section */
+    .section-presenters .resource-list li {
+      border-bottom-color: #c5d9ec;
+    }
+
+    /* ── Resource list ─────────────────────────────────────────── */
+    /*
+      Using <ul> (unordered list) with no bullets.
+      Each item is separated by a subtle border for visual breathing room.
+    */
+    .resource-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .resource-list li {
+      margin-bottom: 1.25rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid #e0ddd8; /* Subtle divider between entries */
+    }
+
+    .resource-list li:last-child {
+      border-bottom: none; /* Remove divider after the final item */
+    }
+
+    .resource-citation {
+      font-size: 0.95rem;
+      color: #222;
+    }
+
+    /*
+      Title links: the hyperlink is placed on the title text itself.
+      Underline distinguishes the link from surrounding text without relying on color alone
+      (WCAG 2.1 SC 1.4.1). Color provides an additional visual cue.
+    */
+    .resource-citation a {
+      color: #1a5276;
+      text-decoration: underline;
+    }
+
+    .resource-citation a:hover,
+    .resource-citation a:focus {
+      color: #0a3d6b;
+      outline: 2px solid #2c5f8a; /* Visible focus indicator (WCAG 2.1 SC 2.4.7) */
+      outline-offset: 2px;
+    }
+
+
+    /* ── Footer ────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid #ccc;
+      padding-top: 1rem;
+      font-size: 0.8rem;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #666;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-wrapper">
+
+    <!-- ============================================================
+      PAGE HEADER
+      Purpose: Identifies the session, presenters, and conference context.
+      Accessibility: Uses semantic <header> landmark and heading hierarchy
+      so screen readers can navigate the page structure (WCAG 2.1 SC 1.3.1).
+    ============================================================ -->
+    <header>
+      <!--
+        Conference label: Identifies the event this session belongs to.
+        Displayed in small uppercase for visual hierarchy without inflating heading level.
+      -->
+      <p class="session-label">CUNY Women Conference Week 2026</p>
+
+      <!-- Primary page title — the session name -->
+      <h1>Unlikely Leaders: Shaping the Direction of AI on Our Campuses</h1>
+
+      <!--
+        Presenter block: Lists both presenters and their institutions.
+        Uses a <ul> so screen readers announce "list of 2 items" — clearer than plain text.
+        Role="list" is added for compatibility with Safari VoiceOver (WCAG 2.1 SC 1.3.1).
+      -->
+      <ul class="presenter-list" role="list">
+        <li>
+          <span class="presenter-name">Jana Porter</span>
+          <span class="presenter-institution">Bronx Community College</span>
+        </li>
+        <li>
+          <span class="presenter-name">Mariya Gluzman</span>
+          <span class="presenter-institution">Brooklyn College</span>
+        </li>
+      </ul>
+
+      <p class="subtitle">Session Resource List</p>
+
+      <!--
+        Contact box: A quick-reference panel for attendees who want to
+        follow up with either presenter after the session.
+      -->
+      <div class="contact-box" aria-label="Contact the Presenters">
+        <p class="contact-box-heading">Contact the Presenters</p>
+        <div class="contact-grid">
+
+          <!-- Jana Porter -->
+          <div>
+            <p class="contact-name">Jana Porter</p>
+            <div class="contact-detail">
+              <a href="mailto:jana.porter@bcc.cuny.edu"
+                 aria-label="Email Jana Porter">jana.porter@bcc.cuny.edu</a><br>
+              <a href="https://www.janaporter.com/"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="Jana Porter's personal website (opens in new tab)">Personal Site</a>
+            </div>
+          </div>
+
+          <!-- Mariya Gluzman -->
+          <div>
+            <p class="contact-name">Mariya Gluzman</p>
+            <div class="contact-detail">
+              <a href="mailto:mgluzman@brooklyn.cuny.edu"
+                 aria-label="Email Mariya Gluzman">mgluzman@brooklyn.cuny.edu</a><br>
+              <a href="https://www.linkedin.com/in/mariyagluzman"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="Mariya Gluzman on LinkedIn (opens in new tab)">LinkedIn</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </header>
+
+    <main>
+
+      <!-- ============================================================
+        SECTION 1 — PRESENTERS' WORK
+        Resources created by session speakers Jana Porter and Mariya Gluzman.
+        Visually highlighted with class="section-presenters" to distinguish
+        from external resources below.
+      ============================================================ -->
+      <section class="section-presenters" aria-labelledby="section-presenters">
+        <h2 id="section-presenters">Presenters' Work</h2>
+
+        <ul class="resource-list">
+
+          <!-- Resource: AI Literacy Jeopardy — Porter, BCC Library -->
+          <li>
+            <p class="resource-citation">
+
+              <a href="https://jeopardylabs.com/play/ai-jeopardy-bcc-library"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="Play AI Literacy Jeopardy (opens in new tab)"><strong>AI Literacy Jeopardy</strong></a>
+              — A Jeopardy-style quiz game for exploring AI concepts. BCC Library.
+            </p>
+          </li>
+
+          <!-- Resource: Porter — AI Library Workshop libguide -->
+          <li>
+            <p class="resource-citation">
+
+              Porter, Jana.
+              <a href="https://bcc-cuny.libguides.com/AIworkshop"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="Visit AI Library Workshop LibGuide (opens in new tab)"><strong>AI Library Workshop.</strong></a>
+              BCC–CUNY LibGuides.
+            </p>
+          </li>
+
+          <!-- Resource: Porter — BCC Student AI Literacy / Faculty Survey -->
+          <li>
+            <p class="resource-citation">
+
+              Porter, Jana.
+              <a href="https://bcc-cuny.libwizard.com/f/ai_lit_feedback"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="Access BCC Student AI Literacy Faculty Survey (opens in new tab)"><strong>BCC Student AI Literacy / Faculty Survey.</strong></a>
+              BCC–CUNY LibWizard.
+            </p>
+          </li>
+
+          <!-- Resource: Gluzman & Karst — Brooklyn College AI for Faculty Guide -->
+          <li>
+            <p class="resource-citation">
+
+              Gluzman, Mariya. &amp; Karst, Kelly. (Last updated December 2025).
+              <a href="https://libguides.brooklyn.cuny.edu/ai_faculty"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="Visit Brooklyn College AI for Faculty Guide (opens in new tab)"><strong>Brooklyn College AI for Faculty Guide.</strong></a>
+              Brooklyn College LibGuides.
+            </p>
+          </li>
+
+          <!-- Resource: Gluzman — Faculty Needs Assessment Survey on AI Training -->
+          <li>
+            <p class="resource-citation">
+
+              Gluzman, Mariya. (December 2025).
+              <a href="https://cuny907-my.sharepoint.com/:b:/g/personal/mariya_gluzman87_login_cuny_edu/IQAkLRR8pMAiQ4PeL8kA8MoCAVPrNLBZv6bBu7Pz9boZcUk?e=bYWZXa"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="View Faculty Needs Assessment Survey on AI Training (opens in new tab)"><em>Faculty Needs Assessment Survey on AI Training.</em></a>
+            </p>
+          </li>
+
+          <!-- Resource: Gluzman — Student AI Literacy Support Needs Survey -->
+          <li>
+            <p class="resource-citation">
+
+              Gluzman, Mariya. (January 2026).
+              <a href="https://cuny907-my.sharepoint.com/:b:/g/personal/mariya_gluzman87_login_cuny_edu/IQCpjMofeuybRbj-Ig940b3TAQw83eEgrGe_W5m_XU4W9tA?e=1lg7zz"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="View Student AI Literacy Support Needs Survey (opens in new tab)"><em>Student AI Literacy Support Needs Survey.</em></a>
+            </p>
+          </li>
+
+        </ul>
+      </section><!-- /section: Presenters' Work -->
+
+      <!-- ============================================================
+        SECTION 2 — OTHER RESOURCES
+        External articles, frameworks, handbooks, and books referenced
+        in the session, covering AI in education and leadership mindset.
+      ============================================================ -->
+      <section aria-labelledby="section-other">
+        <h2 id="section-other">Other Resources</h2>
+
+        <ul class="resource-list">
+
+          <!-- Resource: Holbeck article on AI detection vs. literacy -->
+          <li>
+            <p class="resource-citation">
+
+              Holbeck, Rick. (May 2025).
+              <a href="https://elearnmag.acm.org/opinion.cfm?aid=3729174"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="Read Beyond Detection article on eLearn Magazine (opens in new tab)"><em>Beyond Detection: Why faculty should focus on AI literacy, not AI policing.</em></a>
+              <em>eLearn Magazine</em>, ACM.
+            </p>
+          </li>
+
+
+          <!-- Resource: Educause AI Literacy Framework -->
+          <li>
+            <p class="resource-citation">
+
+              Hibbert, Melanie; Altman, Elana; Shippen, Tristan; &amp; Wright, Melissa. (June 3, 2024).
+              <a href="https://er.educause.edu/articles/2024/6/a-framework-for-ai-literacy"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="Read A Framework for AI Literacy on Educause Review (opens in new tab)"><em>A Framework for AI Literacy.</em></a>
+              <em>Educause Review: Emerging Technologies and Trends.</em>
+            </p>
+          </li>
+
+          <!-- Resource: Freeman — NC Community College AI Handbook -->
+          <li>
+            <p class="resource-citation">
+
+              Freeman, Lane. (November 2025).
+              <a href="https://opennccc.nccommunitycolleges.edu/courseware/lesson/1738/overview"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="View AI Guidance Handbook for NC Community College System (opens in new tab)"><em>AI Guidance Handbook for North Carolina Community College System.</em></a>
+              Open NCCC / NC Community Colleges.
+            </p>
+          </li>
+
+          <!-- Resource: Freeman — TrAIT Framework article -->
+          <li>
+            <p class="resource-citation">
+
+              Freeman, Lane. (April 11, 2025).
+              <a href="https://onlinelearningconsortium.org/olc-insights/2025/04/introduction-to-the-trait-framework/"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="Read Introduction to the TrAIT Framework on OLC Insights (opens in new tab)"><em>Introduction to the TrAIT Framework – How to Embrace AI in the Classroom.</em></a>
+              Online Learning Consortium (OLC) Insights.
+            </p>
+          </li>
+
+          <!-- Resource: Glass Hammer — Negative Thought Patterns -->
+          <li>
+            <p class="resource-citation">
+
+              Glass Hammer.
+              <a href="https://theglasshammer.com/tag/negative-thinking/"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="Read about cutting negative thought patterns on The Glass Hammer (opens in new tab)"><em>Want More Confidence? Cut Down These Five Negative Thought Patterns.</em></a>
+              The Glass Hammer.
+            </p>
+          </li>
+
+          <!-- Resource: Pritchett — Hard Optimism (book, no URL) -->
+          <li>
+            <p class="resource-citation">
+
+              Pritchett, Price. (2014). <em>Hard Optimism: Developing Deep Strengths for Managing Uncertainty, Opportunity, Adversity, and Change.</em>
+            </p>
+          </li>
+
+          <!-- Resource: Brown — Clear is Kind blog post -->
+          <li>
+            <p class="resource-citation">
+
+              Brown, Brené. (October 15, 2018).
+              <a href="https://brenebrown.com/articles/2018/10/15/clear-is-kind-unclear-is-unkind/"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="Read Clear is Kind. Unclear is Unkind. on BrenéBrown.com (opens in new tab)"><em>Clear is Kind. Unclear is Unkind.</em></a>
+              BrenéBrown.com.
+            </p>
+          </li>
+
+          <!-- Resource: Brown — Dare to Lead (book, no URL) -->
+          <li>
+            <p class="resource-citation">
+
+              Brown, Brené. (2018). <em>Dare to Lead: Brave Work. Tough Conversations. Whole Hearts.</em>
+            </p>
+          </li>
+
+          <!-- Resource: Gulati — How to Be Bold (book) -->
+          <li>
+            <p class="resource-citation">
+
+              Gulati, Ranjay. (2025).
+              <a href="https://www.porchlightbooks.com/products/how-to-be-bold-ranjay-gulati-9780063394810"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 aria-label="View How to Be Bold on Porchlight Books (opens in new tab)"><em>How to Be Bold: The Surprising Science of Everyday Courage.</em></a>
+            </p>
+          </li>
+
+        </ul>
+      </section><!-- /section: Other Resources -->
+
+    </main>
+
+    <!-- ============================================================
+      PAGE FOOTER
+      Purpose: Identifies the document as a work in progress.
+    ============================================================ -->
+    <footer>
+      <p>Session resource list &mdash; <em>Unlikely Leaders: Shaping the Direction of AI on Our Campuses</em></p>
+      <p style="margin-top: 0.4rem;">Draft &middot; Last updated March 2026</p>
+    </footer>
+
+  </div><!-- /.page-wrapper -->
+</body>
+</html>
