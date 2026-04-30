@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<!--
+  LIFT@CUNY Conference Session Roster
+  ====================================
+  A static page hosted on GitHub Pages that reads an Excel file
+  (sessions.xlsx) from the same folder and displays session cards
+  for two CUNY-wide conferences:
+    - Bronx EdTech Showcase     (May 1, 2026)
+    - CUNY Teaching & Learning  (May 8, 2026)
+
+  HOW TO USE:
+    1. Export the Microsoft Forms responses as an Excel file.
+    2. Rename that file to: sessions.xlsx
+    3. Place sessions.xlsx in the same folder as this file in the GitHub repo.
+    4. Commit and push — GitHub Pages will serve the updated roster automatically.
+
+  DEPENDENCIES (loaded from CDN — no install required):
+    - SheetJS (xlsx.js): reads the Excel file in the browser
+      https://sheetjs.com
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LIFT@CUNY Member Sessions at Upcoming CUNY-Wide Events</title>
+
+  <!--
+    SheetJS is loaded from a CDN (Content Delivery Network).
+    A CDN is a network of servers around the world that hosts
+    popular libraries — your visitors download it once and it
+    may already be cached in their browser from another site.
+    "defer" means the script loads in the background without
+    blocking the page from rendering.
+  -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+  <style>
+    /* =============================================================
+       CSS CUSTOM PROPERTIES (VARIABLES)
+       Defining colors and values here — once — means we only need
+       to change a value in one place to update the whole design.
+       var(--name) is how you USE a custom property elsewhere in CSS.
+    ============================================================= */
+    :root {
+      /* LIFT@CUNY brand colors (from logo) */
+      --navy:           #1B3A6B;
+      --navy-dark:      #122855;
+      --accent:         #5BAFD6;
+
+      /* Conference accent colors */
+      --edtech-color:   #C8581A;   /* warm orange — Bronx EdTech Showcase */
+      --edtech-light:   #FEF0E7;   /* light tint for tag backgrounds */
+      --tlc-color:      #2878B5;   /* academic blue — CUNY TLC */
+      --tlc-light:      #E7F0FE;
+
+      /* Layout & neutral colors */
+      --page-bg:        #EEF2F8;
+      --card-bg:        #FFFFFF;
+      --border:         #CDD8EC;
+      --text-dark:      #111827;
+      --text-mid:       #4B5563;
+      --text-light:     #6B7280;
+    }
+
+    /* =============================================================
+       CSS RESET & BASE STYLES
+       Browsers apply their own default styles (margins, padding, etc.)
+       that differ across Chrome, Firefox, and Safari. This reset
+       creates a consistent baseline so our design looks the same
+       everywhere.
+       box-sizing: border-box is the most important rule here —
+       it means padding and borders are INCLUDED in the element's
+       width/height, which makes layout math much more predictable.
+    ============================================================= */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /*
+      Explicitly enforce the HTML `hidden` attribute.
+      Without this, other CSS display rules (like display:flex on .session-card)
+      can override the browser's built-in hidden behaviour, breaking show/hide.
+    */
+    [hidden] { display: none !important; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: var(--page-bg);
+      color: var(--text-dark);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* =============================================================
+       SITE HEADER — two-panel layout
+       Left panel:  white background, houses the logo
+       Right panel: navy background, houses the title and subtitle
+
+       align-items: stretch makes both panels grow to the same height
+       so the color split is always a clean vertical line.
+    ============================================================= */
+    .site-header {
+      display: flex;
+      align-items: stretch;
+      flex-wrap: wrap;       /* panels stack vertically on narrow screens */
+    }
+
+    /* White logo panel */
+    .header-logo-panel {
+      background: #ffffff;
+      padding: 1.25rem 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;        /* never squish the logo */
+    }
+
+    .header-logo-panel img {
+      height: 68px;
+      width: auto;
+    }
+
+    /* Navy text panel — stretches to fill the remaining width */
+    .header-text-panel {
+      background-color: var(--navy);
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      flex: 1;
+      min-width: 200px;      /* prevents text area from collapsing on wrap */
+    }
+
+    .header-text-panel h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: white;
+    }
+
+    .header-text-panel p {
+      font-size: 0.95rem;
+      color: #A8C4E0;        /* muted light-blue — softer than pure white */
+      margin-top: 0.25rem;
+    }
+
+    /* Conference links in the header subtitle */
+    .header-text-panel p a {
+      color: #ffffff;
+      text-decoration: underline;
+      text-decoration-color: rgba(255, 255, 255, 0.45);
+      text-underline-offset: 3px;
+      transition: text-decoration-color 0.15s;
+    }
+
+    .header-text-panel p a:hover {
+      text-decoration-color: #ffffff;
+    }
+
+    /* =============================================================
+       MAIN CONTENT AREA
+       max-width keeps long lines readable on wide monitors.
+       auto left/right margins center the block horizontally.
+    ============================================================= */
+    main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* =============================================================
+       FILTER BAR
+       Contains the conference toggle buttons and the presenter
+       search input. Announced as a search landmark to screen readers
+       via role="search" (set in the HTML below).
+    ============================================================= */
+    .filter-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: flex-end;   /* align bottoms of the two groups */
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    /* Small uppercase label above each filter control */
+    .filter-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-light);
+    }
+
+    /* The two conference toggles sit side by side */
+    .conference-toggles {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    /*
+      Toggle buttons are built on real <input type="checkbox"> elements
+      for full keyboard and screen-reader accessibility.
+      The checkbox is visually hidden; its <label> acts as the button face.
+    */
+    .conference-toggle {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .conference-toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: white;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-mid);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s,
+                  box-shadow 0.15s;
+      user-select: none;
+      /*
+        A left border strip indicates active state below.
+        border-left is set to transparent here so it takes up space
+        without showing — prevents the label from shifting width
+        when toggled on.
+      */
+      border-left: 3px solid transparent;
+    }
+
+    .conference-toggle-label:hover {
+      background: var(--page-bg);
+      color: var(--text-dark);
+    }
+
+    /* EdTech — active: light tint background, colored left accent */
+    .conference-toggle.toggle-edtech:checked + .toggle-edtech-label {
+      background: var(--edtech-light);
+      color: var(--edtech-color);
+      border-color: #E8C4A8;
+      border-left-color: var(--edtech-color);
+      font-weight: 600;
+    }
+
+    /* TLC — active */
+    .conference-toggle.toggle-tlc:checked + .toggle-tlc-label {
+      background: var(--tlc-light);
+      color: var(--tlc-color);
+      border-color: #A8C4E8;
+      border-left-color: var(--tlc-color);
+      font-weight: 600;
+    }
+
+    /*
+      :focus-visible shows a focus ring only for keyboard navigation.
+      WCAG 2.1 SC 2.4.7: Focus must be visible.
+    */
+    .conference-toggle:focus-visible + .conference-toggle-label {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Search input stretches to fill available space */
+    .search-wrapper {
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.5rem 0.75rem 0.5rem 2.3rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: var(--text-dark);
+      background-color: #F9FAFC;
+      /*
+        Inline SVG as a background-image for the search icon.
+        This avoids an extra image request and keeps the file self-contained.
+        aria-hidden on the icon element (in the SVG) marks it decorative.
+      */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 0.65rem center;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(91, 175, 214, 0.25);
+    }
+
+    /* =============================================================
+       RESULTS COUNT LINE
+       aria-live="polite" (set in HTML) tells screen readers to
+       announce changes to this paragraph without interrupting the
+       user. This is how the "Showing N sessions" update is read aloud.
+    ============================================================= */
+    .results-info {
+      font-size: 0.875rem;
+      color: var(--text-mid);
+      margin-bottom: 1rem;
+      min-height: 1.4em;   /* prevent layout jump when text changes */
+    }
+
+    /* =============================================================
+       SESSION GRID
+       CSS Grid auto-fill: each column is at least 320px wide but
+       grows to fill available space. On a wide screen this makes
+       3 columns; on a tablet 2; on mobile 1.
+    ============================================================= */
+    .session-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* =============================================================
+       SESSION CARD
+       Each card is an <article> element — semantically correct for
+       self-contained content pieces that make sense on their own.
+    ============================================================= */
+    .session-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;          /* keep the colored top stripe inside */
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .session-card:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      transform: translateY(-3px);
+    }
+
+    /* Colored top border indicates which conference the session belongs to */
+    .session-card.conf-edtech { border-top: 4px solid var(--edtech-color); }
+    .session-card.conf-tlc    { border-top: 4px solid var(--tlc-color); }
+
+    /* The card body holds all the content with consistent padding */
+    .card-body {
+      padding: 1.25rem;
+      flex: 1;               /* stretch to fill the card height */
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    /* Conference label on each card — matches the filter toggle style */
+    .card-conference-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 11pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.25rem 0.6rem;
+      border-radius: 5px;
+      border: 1px solid;
+      border-left-width: 3px;
+      width: fit-content;
+    }
+
+    .conf-edtech .card-conference-tag {
+      background: var(--edtech-light);
+      color: var(--edtech-color);
+      border-color: #E8C4A8;
+      border-left-color: var(--edtech-color);
+    }
+
+    .conf-tlc .card-conference-tag {
+      background: var(--tlc-light);
+      color: var(--tlc-color);
+      border-color: #A8C4E8;
+      border-left-color: var(--tlc-color);
+    }
+
+    /* Session title */
+    .card-title {
+      font-size: 14pt;
+      font-weight: 700;
+      color: var(--text-dark);
+      line-height: 1.35;
+    }
+
+    /* Primary presenter row */
+    .card-presenter {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .presenter-name {
+      font-size: 0.925rem;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    /*
+      The presenter's name is an <a href="mailto:..."> link
+      if they provided their email. Dotted underline signals
+      interactivity without being visually heavy.
+    */
+    .presenter-name a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px dotted var(--accent);
+    }
+
+    .presenter-name a:hover {
+      border-bottom-style: solid;
+    }
+
+    /* Co-presenters section */
+    .card-copresenters {
+      font-size: 0.85rem;
+      color: var(--text-mid);
+    }
+
+    /* "WITH:" sub-label */
+    .copresenters-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-light);
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .copresenter-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .copresenter-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    /* =============================================================
+       LIFT@CUNY BADGE
+       A small colored tag indicating LIFT@CUNY Collective membership.
+
+       - ALL primary presenters get this badge (every form respondent
+         is a LIFT member by definition).
+       - Co-presenters get it only if the respondent marked "(LIFT)"
+         after their name in the form.
+
+       The ★ symbol is added via CSS ::before pseudo-element.
+       The aria-label attribute provides the full accessible name
+       for screen readers so they don't just read "LIFT".
+       WCAG 2.1 SC 1.1.1: non-text content needs a text alternative.
+    ============================================================= */
+    .lift-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      background: #E8ECF2;
+      color: #6B7A99;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 0.1rem 0.4rem 0.1rem 0.3rem;
+      border-radius: 4px;
+      white-space: nowrap;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+
+    /* Star symbol prepended to every badge via CSS content */
+    .lift-badge::before {
+      content: '★';
+      font-size: 1.1em;
+    }
+
+    /* =============================================================
+       CARD META: date and location
+    ============================================================= */
+    .card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-mid);
+    }
+
+    /* aria-hidden="true" is on these in the HTML — they're purely decorative */
+    .meta-icon {
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    /* =============================================================
+       SESSION DESCRIPTION
+       Sits at the bottom of the card, separated by a top border.
+       margin-top: auto pushes it to the card's bottom regardless
+       of how much content is above it, making all cards in a row
+       feel consistent.
+    ============================================================= */
+    .card-description {
+      font-size: 12pt;
+      color: var(--text-mid);
+      line-height: 1.65;
+      margin-top: auto;
+      padding-top: 0.8rem;
+      border-left: 2px solid #9CA3AF;
+      padding-left: 0.75rem;
+    }
+
+    /* =============================================================
+       EMPTY / LOADING / ERROR STATES
+       grid-column: 1 / -1 makes the message span ALL columns of
+       the grid, so it sits centered regardless of column count.
+    ============================================================= */
+    .state-message {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-light);
+    }
+
+    .state-message strong {
+      display: block;
+      font-size: 1.15rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-mid);
+    }
+
+    /* =============================================================
+       FOOTER
+    ============================================================= */
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* =============================================================
+       RESPONSIVE STYLES
+       @media queries apply rules only when the screen width is
+       below a certain size. 640px is a common breakpoint for
+       "phone-sized" screens.
+    ============================================================= */
+    @media (max-width: 640px) {
+      .header-logo-panel {
+        padding: 1rem 1.25rem;
+        width: 100%;           /* logo panel spans full width when stacked */
+        justify-content: flex-start;
+      }
+
+      .header-logo-panel img {
+        height: 50px;
+      }
+
+      .header-text-panel {
+        padding: 1rem 1.25rem;
+      }
+
+      .header-text-panel h1 {
+        font-size: 1.2rem;
+      }
+
+      main {
+        padding: 0 1rem;
+        margin: 1rem auto;
+      }
+
+      .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+
+      .session-grid {
+        grid-template-columns: 1fr;   /* single column on mobile */
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!--
+    SITE HEADER
+    ============================================================
+    <header> is a semantic landmark element. Screen reader users
+    can navigate directly to it. It wraps the branding area.
+  -->
+  <header class="site-header">
+
+    <!-- White logo panel -->
+    <div class="header-logo-panel">
+      <!--
+        alt text is required for all meaningful images.
+        WCAG 2.1 SC 1.1.1: non-text content must have a text alternative.
+      -->
+      <img src="LIFT-CUNY_logo.png" alt="LIFT@CUNY Collective" />
+    </div>
+
+    <!-- Navy text panel -->
+    <div class="header-text-panel">
+      <h1>LIFT@CUNY Member Sessions at Upcoming CUNY-Wide Events</h1>
+      <p>
+        <a href="https://commons.hostos.cuny.edu/bronxedtech/" target="_blank" rel="noopener noreferrer">Bronx EdTech Showcase</a>
+        &mdash; May 1, 2026 &nbsp;&bull;&nbsp;
+        <a href="https://www.cuny.edu/academics/faculty-affairs/cuny-innovative-teaching-academy/cuny-teaching-and-learning-conference/" target="_blank" rel="noopener noreferrer">CUNY Teaching &amp; Learning Conference</a>
+        &mdash; May 8, 2026
+      </p>
+    </div>
+
+  </header>
+
+  <!--
+    MAIN CONTENT
+    ============================================================
+    <main> is a semantic landmark. It lets keyboard and screen reader
+    users skip directly to the page's primary content, bypassing
+    the header and navigation. WCAG 2.1 SC 2.4.1: bypass blocks.
+  -->
+  <main>
+
+    <!--
+      FILTER BAR
+      role="search" tells assistive technologies that this region
+      contains search and filter functionality.
+    -->
+    <section class="filter-bar" role="search" aria-label="Filter and search sessions">
+
+      <!-- Conference filter toggles -->
+      <div class="filter-group">
+        <span class="filter-label" id="conf-filter-label">Show Conference</span>
+
+        <!--
+          role="group" + aria-labelledby groups the two checkboxes so a
+          screen reader announces "Show Conference group" before reading them.
+        -->
+        <div class="conference-toggles" role="group" aria-labelledby="conf-filter-label">
+
+          <!--
+            CHECKBOX TOGGLE PATTERN:
+            A real <input type="checkbox"> is visually hidden but stays in the
+            accessibility tree. Its visible <label> acts as the button face.
+            The for="toggle-edtech" on the label and id="toggle-edtech" on the
+            input link them — clicking the label toggles the checkbox.
+          -->
+          <input
+            type="checkbox"
+            id="toggle-edtech"
+            class="conference-toggle toggle-edtech"
+            checked
+          />
+          <label for="toggle-edtech" class="conference-toggle-label toggle-edtech-label">
+            &#128187;&nbsp;Bronx EdTech Showcase
+          </label>
+
+          <input
+            type="checkbox"
+            id="toggle-tlc"
+            class="conference-toggle toggle-tlc"
+            checked
+          />
+          <label for="toggle-tlc" class="conference-toggle-label toggle-tlc-label">
+            &#127979;&nbsp;CUNY Teaching &amp; Learning Conference
+          </label>
+
+        </div>
+      </div>
+
+      <!-- Presenter name search -->
+      <div class="filter-group search-wrapper">
+        <label class="filter-label" for="presenter-search">Search by Presenter</label>
+        <input
+          type="search"
+          id="presenter-search"
+          class="search-input"
+          placeholder="Type a name…"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+
+    </section>
+
+    <!--
+      RESULTS INFO LINE
+      aria-live="polite" causes screen readers to announce changes
+      to this paragraph after the user finishes their current action
+      (e.g., after typing in the search box). aria-atomic="true" means
+      the full updated sentence is read, not just the changed portion.
+    -->
+    <p
+      class="results-info"
+      id="results-info"
+      aria-live="polite"
+      aria-atomic="true"
+    >Loading sessions…</p>
+
+    <!--
+      SESSION GRID
+      role="list" pairs with role="listitem" on each card below.
+      This gives screen readers a proper list structure to navigate.
+    -->
+    <!--
+      LOCAL TESTING FALLBACK
+      When opened as a file:// URL (directly from your computer),
+      browsers block fetch() for security. This picker appears
+      automatically in that case so you can load sessions.xlsx manually.
+      On GitHub Pages the fetch works normally and this is never shown.
+    -->
+    <div id="local-file-picker" hidden style="
+        background:#FEF9E7;border:1px solid #F0C040;border-radius:10px;
+        padding:1rem 1.25rem;margin-bottom:1.5rem;font-size:0.9rem;
+        color:#7D6608;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+      <span>&#128196; <strong>Local preview mode:</strong>
+        Select <code>sessions.xlsx</code> to load the data.</span>
+      <label style="cursor:pointer;">
+        <input type="file" id="local-file-input" accept=".xlsx" style="display:none" />
+        <span style="background:#1B3A6B;color:white;padding:0.35rem 0.9rem;
+            border-radius:6px;font-weight:600;font-size:0.85rem;">Choose file…</span>
+      </label>
+    </div>
+
+    <div class="session-grid" id="session-grid" role="list">
+      <div class="state-message">
+        <strong>Loading…</strong>
+        Fetching sessions from the registry.
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>LIFT@CUNY Collective &mdash; Conference Session Roster &mdash; Spring 2026</p>
+  </footer>
+
+
+  <!-- ============================================================
+       JAVASCRIPT
+       All logic for loading the Excel file, parsing each row,
+       building session cards, and handling filter/search interactions.
+
+       This script runs AFTER the page has loaded (see the
+       DOMContentLoaded listener at the bottom).
+  ============================================================ -->
+  <script>
+    /*
+      ============================================================
+      CONFIGURATION
+      ============================================================
+      Change values here if the Excel filename or conference details
+      ever need updating. Nothing else in the code needs to change.
+    */
+    const CONFIG = {
+
+      // Name of the Excel file — must be in the same folder as this HTML file.
+      excelFile: 'sessions.xlsx',
+
+      conferences: {
+        edtech: {
+          id:        'edtech',
+          name:      'Bronx EdTech Showcase',
+          date:      'May 1, 2026',
+          cardClass: 'conf-edtech',
+          icon:      '💻'
+        },
+        tlc: {
+          id:        'tlc',
+          name:      'CUNY Teaching & Learning Conference',
+          date:      'May 8, 2026',
+          cardClass: 'conf-tlc',
+          icon:      '🎓'
+        }
+      }
+    };
+
+
+    /*
+      ============================================================
+      COLUMN MATCHING HELPERS
+      ============================================================
+      Microsoft Forms exports Excel files with very long column headers.
+      Instead of hard-coding exact header strings (which could break
+      if someone edits a question slightly), we find columns by checking
+      whether the header CONTAINS a short identifying keyword.
+
+      findCol  → returns the index of the FIRST matching header
+      findCols → returns an array of ALL matching header indices
+      cell     → safely reads a value from a row at a given column index
+    */
+
+    /**
+     * Find the first column whose header contains `keyword` (case-insensitive).
+     * Returns -1 if no match is found.
+     *
+     * @param {string[]} headers  - array of header strings from row 1
+     * @param {string}   keyword  - substring to search for
+     * @returns {number}
+     */
+    function findCol(headers, keyword) {
+      const kw = keyword.toLowerCase();
+      return headers.findIndex(h => h && h.toLowerCase().includes(kw));
+    }
+
+    /**
+     * Find ALL columns whose header contains `keyword`.
+     * Used for questions that appear twice in the form (EdTech + TLC).
+     * Microsoft Forms names the duplicate with a trailing "1".
+     *
+     * @param {string[]} headers
+     * @param {string}   keyword
+     * @returns {number[]}
+     */
+    function findCols(headers, keyword) {
+      const kw = keyword.toLowerCase();
+      return headers.reduce((acc, h, i) => {
+        if (h && h.toLowerCase().includes(kw)) acc.push(i);
+        return acc;
+      }, []);
+    }
+
+    /**
+     * Safely read a cell value from a row, returning an empty string
+     * if the column index is invalid or the cell is blank.
+     *
+     * @param {Array}  row    - the row data array from SheetJS
+     * @param {number} colIdx - the column index to read
+     * @returns {string}
+     */
+    function cell(row, colIdx) {
+      if (colIdx < 0 || row[colIdx] === undefined || row[colIdx] === null) {
+        return '';
+      }
+      return String(row[colIdx]).trim();
+    }
+
+
+    /*
+      ============================================================
+      CO-PRESENTER PARSING
+      ============================================================
+      The form asks respondents to write "(LIFT)" after any
+      co-presenter who belongs to the LIFT@CUNY Collective.
+
+      Example raw input:
+        "Jane Doe, Lehman College (LIFT)\nJohn Smith, City Tech"
+
+      This function splits that text into structured objects:
+        [
+          { name: "Jane Doe, Lehman College", isLift: true  },
+          { name: "John Smith, City Tech",    isLift: false }
+        ]
+
+      Splitting on newlines/semicolons (not commas) is intentional:
+      "Name, Campus" uses a comma as part of the entry, so splitting
+      on commas would break entries apart incorrectly.
+    */
+    function parseCoPresenters(rawText) {
+      if (!rawText || !rawText.trim()) return [];
+
+      return rawText
+        .split(/[\n;]+/)           // split on newlines or semicolons
+        .map(entry => entry.trim())
+        .filter(entry => entry.length > 0)
+        .map(entry => {
+          const isLift = /\(LIFT\)/i.test(entry);
+          const name   = entry.replace(/\s*\(LIFT\)\s*/gi, '').trim();
+          return { name, isLift };
+        });
+    }
+
+
+    /*
+      ============================================================
+      EXCEL LOADING & PARSING
+      ============================================================
+      1. fetch() downloads the Excel file as raw binary data.
+      2. SheetJS (XLSX) reads those bytes and gives us an array of rows.
+      3. We map each row to a session object (up to two per row —
+         one per conference the respondent is presenting at).
+    */
+    async function loadSessions() {
+
+      let workbook;
+
+      try {
+        const response = await fetch(CONFIG.excelFile);
+
+        // response.ok is false for 404, 403, etc. — throw a useful error
+        if (!response.ok) {
+          throw new Error(`Server returned HTTP ${response.status}`);
+        }
+
+        const buffer = await response.arrayBuffer(); // raw bytes
+        workbook = XLSX.read(buffer, { type: 'array' });
+
+      } catch (err) {
+        /*
+          fetch() fails when the page is opened as a file:// URL because
+          browsers treat that as a CORS violation. We detect this and show
+          a manual file picker instead. On GitHub Pages (http/https) the
+          fetch succeeds and this branch is never reached.
+        */
+        if (window.location.protocol === 'file:') {
+          document.getElementById('local-file-picker').hidden = false;
+          document.getElementById('results-info').textContent = '';
+          document.getElementById('session-grid').innerHTML = '';
+
+          // Return a Promise that resolves when the user picks a file
+          return new Promise(resolve => {
+            document.getElementById('local-file-input').addEventListener('change', async e => {
+              const file = e.target.files[0];
+              if (!file) return;
+              const buffer = await file.arrayBuffer();
+              workbook = XLSX.read(buffer, { type: 'array' });
+              // Hide the picker and continue with the same workbook
+              document.getElementById('local-file-picker').hidden = true;
+              resolve(parseWorkbook(workbook));
+            });
+          });
+        }
+
+        showError(
+          `Could not load <strong>${CONFIG.excelFile}</strong>.` +
+          ` Make sure the file is uploaded to the same folder as this page in GitHub.<br>` +
+          `<small style="color:var(--text-light)">${err.message}</small>`
+        );
+        return [];
+      }
+
+      return parseWorkbook(workbook);
+    }
+
+    /*
+      parseWorkbook() contains all the logic for reading rows and building
+      session objects. It is called from loadSessions() whether the workbook
+      arrived via fetch (GitHub Pages) or via the manual file picker (local).
+    */
+    function parseWorkbook(workbook) {
+      /*
+        SheetNames is an array of tab names in the workbook.
+        We read the first sheet — that's where Forms exports the data.
+
+        sheet_to_json with { header: 1 } returns an array of arrays:
+          rows[0] = the header row (column names)
+          rows[1..n] = data rows
+        defval: '' fills empty cells with an empty string instead of undefined.
+      */
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows  = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+      if (rows.length < 2) return []; // file exists but has no data rows yet
+
+      // Row 0 is headers; strip whitespace from each header
+      const headers = rows[0].map(h => String(h).trim());
+
+      // ── DEBUG: log all headers so we can verify column matching ──
+      console.group('📋 DEBUG: Excel headers found');
+      headers.forEach((h, i) => { if (h) console.log(`[${i}] "${h}"`); });
+      console.groupEnd();
+
+      /*
+        Build a map of column names → column indices.
+
+        For columns that appear ONCE, findCol() returns a single index.
+        For columns that appear TWICE (same question asked for each
+        conference), findCols() returns both indices; we take [0] for
+        EdTech and [1] for TLC because the EdTech section comes first
+        in the form.
+      */
+      const COL = {
+        // Primary presenter info
+        presenterName : findCol(headers, 'full name and campus affiliation'),
+        email         : findCol(headers, 'share your cuny email'),
+
+        // EdTech (Conference 1) — unique column names
+        edtechYN      : findCol(headers, 'bronx edtech showcase'),
+        edtechTitle   : findCol(headers, 'title of your edtech session'),
+        edtechDesc    : findCol(headers, 'description of your edtech'),
+
+        // TLC (Conference 2) — unique column names
+        tlcYN         : findCol(headers, 'cuny tlc on may'),
+        tlcTitle      : findCol(headers, 'title of your tlc session'),
+        tlcDesc       : findCol(headers, 'description of your tlc'),
+      };
+
+      // Co-presenter and location columns appear TWICE (once per conference)
+      const coPresentCols = findCols(headers, 'list your co-presenters');
+      const locationCols  = findCols(headers, 'share the time and the specific location');
+
+      COL.edtechCoPresenters = coPresentCols[0] ?? -1;
+      COL.tlcCoPresenters    = coPresentCols[1] ?? -1;
+      COL.edtechLocation     = locationCols[0]  ?? -1;
+      COL.tlcLocation        = locationCols[1]  ?? -1;
+
+      // ── DEBUG: log resolved column indices ──
+      console.group('📌 DEBUG: Column index mapping');
+      Object.entries(COL).forEach(([k, v]) => console.log(`${k}: column ${v}`));
+      console.groupEnd();
+
+      // ── DEBUG: log the first data row raw values ──
+      if (rows[1]) {
+        console.group('📄 DEBUG: First data row (raw)');
+        rows[1].forEach((v, i) => { if (v !== '') console.log(`[${i}] "${v}"`); });
+        console.groupEnd();
+      }
+
+      /*
+        Process each data row.
+        Each row can produce 0, 1, or 2 session cards depending on
+        which conferences the person is presenting at.
+      */
+      const sessions = [];
+
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+
+        // Skip rows that are completely empty (common at the end of Excel files)
+        if (!row || !row.some(c => c !== '')) continue;
+
+        const presenterName = cell(row, COL.presenterName);
+        const email         = cell(row, COL.email);
+
+        // Skip rows with no presenter name (shouldn't happen with form data)
+        if (!presenterName) continue;
+
+        // ── DEBUG: log the yes/no values for this row ──
+        console.log(`Row ${i} — edtechYN: "${cell(row, COL.edtechYN)}" | tlcYN: "${cell(row, COL.tlcYN)}"`);
+
+        // ── EdTech session ─────────────────────────────────────
+        if (cell(row, COL.edtechYN).toLowerCase().includes('yes')) {
+          sessions.push({
+            conference   : 'edtech',
+            title        : cell(row, COL.edtechTitle) || '(Title not provided)',
+            presenter    : { name: presenterName, email: email || null },
+            coPresenters : parseCoPresenters(cell(row, COL.edtechCoPresenters)),
+            location     : cell(row, COL.edtechLocation),
+            description  : cell(row, COL.edtechDesc),
+          });
+        }
+
+        // ── TLC session ────────────────────────────────────────
+        if (cell(row, COL.tlcYN).toLowerCase().includes('yes')) {
+          sessions.push({
+            conference   : 'tlc',
+            title        : cell(row, COL.tlcTitle) || '(Title not provided)',
+            presenter    : { name: presenterName, email: email || null },
+            coPresenters : parseCoPresenters(cell(row, COL.tlcCoPresenters)),
+            location     : cell(row, COL.tlcLocation),
+            description  : cell(row, COL.tlcDesc),
+          });
+        }
+      }
+
+      return sessions;
+    }
+
+
+    /*
+      ============================================================
+      HTML RENDERING
+      ============================================================
+      These functions convert session data objects into HTML strings.
+
+      IMPORTANT — escapeHtml():
+      All text that came from the Excel file (i.e., user-submitted
+      form data) is passed through escapeHtml() before being placed
+      in the HTML. This prevents XSS (Cross-Site Scripting) — a
+      security vulnerability where specially crafted text in the
+      data could otherwise run as JavaScript in visitors' browsers.
+      OWASP Top 10 A03: Injection.
+    */
+
+    /**
+     * Replace characters that have special meaning in HTML with
+     * their safe entity equivalents.
+     * e.g., <script> becomes &lt;script&gt; and renders as plain text.
+     */
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g,  '&amp;')
+        .replace(/</g,  '&lt;')
+        .replace(/>/g,  '&gt;')
+        .replace(/"/g,  '&quot;')
+        .replace(/'/g,  '&#39;');
+    }
+
+    /**
+     * Render the LIFT@CUNY membership badge as an HTML string.
+     * role="img" + aria-label gives the badge a proper accessible name
+     * so screen readers announce "LIFT@CUNY Collective member" rather
+     * than trying to interpret the ★ symbol.
+     */
+    function liftBadgeHtml() {
+      return `<span class="lift-badge" role="img" aria-label="LIFT@CUNY Collective member">LIFT</span>`;
+    }
+
+    /**
+     * Build a single session card's HTML string.
+     * @param {object} session - a parsed session object
+     * @returns {string} HTML for one <article> card
+     */
+    function renderCard(session) {
+      const conf = CONFIG.conferences[session.conference];
+
+      // ── Conference tag ────────────────────────────────────────
+      const tagHtml = `
+        <div class="card-conference-tag">
+          ${conf.icon} ${escapeHtml(conf.name)}
+        </div>`;
+
+      // ── Presenter name (linked to email if provided) ──────────
+      const escapedName   = escapeHtml(session.presenter.name);
+      const presenterLink = session.presenter.email
+        ? `<a href="mailto:${escapeHtml(session.presenter.email)}"
+              title="Email ${escapedName}">${escapedName}</a>`
+        : escapedName;
+
+      const presenterHtml = `
+        <div class="card-presenter">
+          <span class="presenter-name">${presenterLink}</span>
+          ${liftBadgeHtml()}
+        </div>`;
+
+      // ── Co-presenters ─────────────────────────────────────────
+      let coPresentersHtml = '';
+      if (session.coPresenters.length > 0) {
+        const listItems = session.coPresenters.map(cp => `
+          <li>
+            <span>${escapeHtml(cp.name)}</span>
+            ${cp.isLift ? liftBadgeHtml() : ''}
+          </li>`).join('');
+
+        coPresentersHtml = `
+          <div class="card-copresenters">
+            <span class="copresenters-label">With</span>
+            <ul class="copresenter-list">${listItems}</ul>
+          </div>`;
+      }
+
+      // ── Date + location ───────────────────────────────────────
+      const locationHtml = session.location
+        ? `<div class="meta-item">
+             <span class="meta-icon" aria-hidden="true">📍</span>
+             <span>${escapeHtml(session.location)}</span>
+           </div>`
+        : '';
+
+      const metaHtml = `
+        <div class="card-meta">
+          <div class="meta-item">
+            <span class="meta-icon" aria-hidden="true">📅</span>
+            <span>${escapeHtml(conf.date)}</span>
+          </div>
+          ${locationHtml}
+        </div>`;
+
+      // ── Description ───────────────────────────────────────────
+      const descHtml = session.description
+        ? `<p class="card-description">${escapeHtml(session.description)}</p>`
+        : '';
+
+      // ── Full card ─────────────────────────────────────────────
+      /*
+        data-conference and data-search-text are "data attributes" —
+        custom attributes we attach to the HTML element to store
+        information JavaScript needs for filtering. They don't affect
+        the visual presentation.
+
+        role="listitem" pairs with role="list" on the grid container.
+      */
+      return `
+        <article
+          class="session-card ${conf.cardClass}"
+          role="listitem"
+          data-conference="${escapeHtml(session.conference)}"
+          data-search-text="${escapeHtml(buildSearchText(session))}"
+        >
+          <div class="card-body">
+            ${tagHtml}
+            <h2 class="card-title">${escapeHtml(session.title)}</h2>
+            ${presenterHtml}
+            ${coPresentersHtml}
+            ${metaHtml}
+            ${descHtml}
+          </div>
+        </article>`;
+    }
+
+    /**
+     * Build a lowercased, searchable string from all name fields
+     * in a session. Stored as a data attribute on each card so
+     * filtering doesn't need to re-read individual child elements.
+     */
+    function buildSearchText(session) {
+      return [
+        session.presenter.name,
+        ...session.coPresenters.map(cp => cp.name)
+      ].join(' ').toLowerCase();
+    }
+
+
+    /*
+      ============================================================
+      FILTERING
+      ============================================================
+      Called whenever the user changes a toggle or types in the
+      search box. Reads the current filter state and shows/hides
+      cards accordingly by toggling the hidden attribute.
+
+      Using the hidden attribute (rather than display:none in CSS)
+      is the correct semantic approach — it also hides elements
+      from the accessibility tree, so screen readers skip them.
+    */
+    function applyFilters() {
+      const showEdtech = document.getElementById('toggle-edtech').checked;
+      const showTLC    = document.getElementById('toggle-tlc').checked;
+      const query      = document.getElementById('presenter-search')
+                               .value.trim().toLowerCase();
+
+      const cards = document.querySelectorAll('.session-card');
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const conf       = card.dataset.conference;       // 'edtech' or 'tlc'
+        const searchText = card.dataset.searchText;       // all names, lowercased
+
+        // Is this card's conference currently toggled on?
+        const confVisible = (conf === 'edtech' && showEdtech) ||
+                            (conf === 'tlc'    && showTLC);
+
+        // Does the search query appear in any presenter name?
+        // An empty query (!query) means show everything.
+        const searchVisible = !query || searchText.includes(query);
+
+        const visible = confVisible && searchVisible;
+
+        /*
+          The hidden attribute completely removes an element from
+          both the visual display and the accessibility tree.
+          This is preferable to CSS visibility:hidden or display:none
+          because it is semantic and not easily overridden by CSS.
+        */
+        card.hidden = !visible;
+        if (visible) visibleCount++;
+      });
+
+      updateResultsInfo(visibleCount);
+    }
+
+    /**
+     * Update the "Showing N sessions" line and announce it to
+     * screen readers via the aria-live region.
+     */
+    function updateResultsInfo(count) {
+      const el = document.getElementById('results-info');
+      if (count === 0) {
+        el.textContent = 'No sessions match your current filters.';
+      } else {
+        el.textContent = `Showing ${count} session${count !== 1 ? 's' : ''}.`;
+      }
+    }
+
+
+    /*
+      ============================================================
+      ERROR / EMPTY STATE HELPERS
+    ============================================================= */
+    function showError(htmlMessage) {
+      document.getElementById('session-grid').innerHTML =
+        `<div class="state-message">
+           <strong>Unable to load sessions</strong>
+           <p>${htmlMessage}</p>
+         </div>`;
+      document.getElementById('results-info').textContent = '';
+    }
+
+
+    /*
+      ============================================================
+      INITIALISATION
+      ============================================================
+      DOMContentLoaded fires when the browser has finished parsing
+      the HTML and building the DOM tree — but before images and
+      stylesheets are fully loaded. This is the right moment to
+      attach event listeners and start our async data fetch.
+
+      async/await lets us write asynchronous code (code that waits
+      for something — like a file download) in a readable, step-by-
+      step style rather than nesting callbacks.
+    */
+    document.addEventListener('DOMContentLoaded', async () => {
+
+      // Attach filter listeners
+      document.getElementById('toggle-edtech')
+        .addEventListener('change', applyFilters);
+
+      document.getElementById('toggle-tlc')
+        .addEventListener('change', applyFilters);
+
+      /*
+        'input' fires on every keystroke, giving live search results.
+        This is more responsive than 'change', which only fires when
+        the input loses focus.
+      */
+      document.getElementById('presenter-search')
+        .addEventListener('input', applyFilters);
+
+      // Load sessions from the Excel file
+      const sessions = await loadSessions();
+      const grid = document.getElementById('session-grid');
+
+      if (sessions.length === 0) {
+        grid.innerHTML = `
+          <div class="state-message">
+            <strong>No sessions yet</strong>
+            <p>Check back after the registration form closes.</p>
+          </div>`;
+        document.getElementById('results-info').textContent = '';
+        return;
+      }
+
+      // Sort: Bronx EdTech sessions first, CUNY TLC second.
+      // Within each conference the original submission order is preserved.
+      sessions.sort((a, b) => {
+        if (a.conference === b.conference) return 0;
+        return a.conference === 'edtech' ? -1 : 1;
+      });
+
+      // Render all session cards into the grid
+      grid.innerHTML = sessions.map(renderCard).join('');
+
+      // Apply the default filter state (both conferences checked = show all)
+      applyFilters();
+
+    });
+  </script>
+
+</body>
+</html>
