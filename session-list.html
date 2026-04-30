@@ -528,19 +528,80 @@
 
     /* =============================================================
        SESSION DESCRIPTION
-       Sits at the bottom of the card, separated by a top border.
-       margin-top: auto pushes it to the card's bottom regardless
-       of how much content is above it, making all cards in a row
-       feel consistent.
+       The wrapper holds the left accent border. The inner <p> is
+       clamped to 4 lines by default; adding the .expanded class
+       removes the clamp so the full text is visible.
     ============================================================= */
+    .card-description-wrapper {
+      padding-top: 0.8rem;
+      border-left: 2px solid #9CA3AF;
+      padding-left: 0.75rem;
+    }
+
     .card-description {
       font-size: 12pt;
       color: var(--text-mid);
       line-height: 1.65;
-      margin-top: auto;
-      padding-top: 0.8rem;
-      border-left: 2px solid #9CA3AF;
-      padding-left: 0.75rem;
+      /* Clamp to 4 lines when collapsed */
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* When expanded, remove the line clamp */
+    .card-description.expanded {
+      display: block;
+      overflow: visible;
+    }
+
+    /* Read more / Show less toggle button */
+    .desc-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.45rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--navy);
+      padding: 0;
+      transition: color 0.15s;
+    }
+
+    .desc-toggle:hover {
+      color: var(--accent);
+    }
+
+    /* WCAG 2.1 SC 2.4.7: visible focus indicator for keyboard users */
+    .desc-toggle:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: 3px;
+    }
+
+    /* Circular icon badge showing + or − */
+    .desc-toggle-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.15rem;
+      height: 1.15rem;
+      border-radius: 50%;
+      background: var(--navy);
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 700;
+      line-height: 1;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+
+    /* When expanded, the icon badge shifts to a neutral grey */
+    .desc-toggle[aria-expanded="true"] .desc-toggle-icon {
+      background: var(--text-mid);
     }
 
     /* =============================================================
@@ -1193,8 +1254,18 @@
         </div>`;
 
       // ── Description ───────────────────────────────────────────
+      // The toggle button is always rendered here; after the grid is
+      // built, a post-render check hides it for short descriptions
+      // that don't actually overflow the 4-line clamp.
       const descHtml = session.description
-        ? `<p class="card-description">${escapeHtml(session.description)}</p>`
+        ? `<div class="card-description-wrapper">
+             <p class="card-description">${escapeHtml(session.description)}</p>
+             <button class="desc-toggle" aria-expanded="false"
+                     aria-label="Expand description">
+               <span class="desc-toggle-text">Read more</span>
+               <span class="desc-toggle-icon" aria-hidden="true">+</span>
+             </button>
+           </div>`
         : '';
 
       // ── Full card ─────────────────────────────────────────────
@@ -1366,6 +1437,36 @@
 
       // Render all session cards into the grid
       grid.innerHTML = sessions.map(renderCard).join('');
+
+      // Hide the "Read more" button on any description that fits within
+      // the 4-line clamp without actually overflowing. We check this
+      // AFTER rendering because the browser only knows the real rendered
+      // height once the elements are in the DOM.
+      document.querySelectorAll('.card-description-wrapper').forEach(wrapper => {
+        const desc = wrapper.querySelector('.card-description');
+        const btn  = wrapper.querySelector('.desc-toggle');
+        if (desc.scrollHeight <= desc.clientHeight) {
+          btn.hidden = true;
+        }
+      });
+
+      // Single click listener on the grid handles all toggle buttons
+      // (event delegation — one listener instead of one per card).
+      grid.addEventListener('click', e => {
+        const btn = e.target.closest('.desc-toggle');
+        if (!btn) return;
+
+        const desc      = btn.closest('.card-description-wrapper')
+                             .querySelector('.card-description');
+        const expanding = btn.getAttribute('aria-expanded') !== 'true';
+
+        desc.classList.toggle('expanded', expanding);
+        btn.setAttribute('aria-expanded', String(expanding));
+        btn.querySelector('.desc-toggle-text').textContent =
+          expanding ? 'Show less' : 'Read more';
+        btn.querySelector('.desc-toggle-icon').textContent =
+          expanding ? '−' : '+';
+      });
 
       // Apply the default filter state (both conferences checked = show all)
       applyFilters();
