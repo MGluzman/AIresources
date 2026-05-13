@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accessibility &amp; UDL — Brooklyn College AIT Faculty Resource</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bc-maroon: #882345;
+    --bc-maroon-dark: #621933;
+    --bc-maroon-light: #f5e8ed;
+    --bc-gold: #EBB700;
+    --bc-gold-pale: #fef9e6;
+    --bc-gold-dark: #a07d00;
+    --bc-gray: #82786F;
+    --bc-gray-light: #f2f0ef;
+    --text-primary: #111111;
+    --text-secondary: #555555;
+    --border: rgba(0,0,0,0.12);
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f8f7;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+
+  body { font-family: 'DM Sans', sans-serif; color: var(--text-primary); background: #f4f3f1; min-height: 100vh; padding: 2rem 1rem; }
+  .page-wrap { max-width: 720px; margin: 0 auto; }
+  .guide { background: var(--bg-primary); border-radius: 16px; padding: 2rem; box-shadow: 0 2px 16px rgba(0,0,0,0.08); }
+
+  .hero { background: var(--bc-maroon); border-radius: var(--radius-lg); padding: 2rem 1.75rem; margin-bottom: 2rem; }
+  .hero h1 { font-family: 'Lora', serif; font-size: 26px; font-weight: 600; line-height: 1.3; margin-bottom: 0.75rem; color: #fff; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.82); line-height: 1.7; }
+  .hero em { color: var(--bc-gold); font-style: normal; font-weight: 500; }
+
+  .bc-wordmark { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
+  .bc-wordmark .bar { width: 4px; height: 36px; background: var(--bc-gold); border-radius: 2px; }
+  .bc-wordmark .text { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.7); line-height: 1.4; letter-spacing: 0.03em; text-transform: uppercase; }
+
+  .section-label { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #111111; margin-bottom: 0.85rem; }
+  .spectrum-intro { font-size: 15px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 1.25rem; }
+
+  .spectrum-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 2rem; }
+  .spectrum-card { background: var(--bg-primary); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.4rem 1.25rem; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+  .spectrum-card:hover { border-color: var(--bc-maroon); background: var(--bc-maroon-light); }
+  .spectrum-card.active { border: 1.5px solid var(--bc-maroon); background: var(--bc-maroon-light); }
+  .spectrum-card .icon { font-size: 28px; margin-bottom: 10px; display: block; }
+  .spectrum-card .card-title { font-size: 17px; font-weight: 600; margin-bottom: 6px; color: var(--bc-maroon-dark); }
+  .spectrum-card .card-teaser { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+  .detail-box { background: var(--bc-maroon-light); border-radius: var(--radius-lg); border: 0.5px solid rgba(136,35,69,0.2); padding: 1.25rem 1.5rem; margin-bottom: 2rem; min-height: 80px; }
+  .detail-box h3 { font-size: 17px; font-weight: 600; margin-bottom: 0.5rem; color: var(--bc-maroon-dark); }
+  .detail-box p { font-size: 14px; line-height: 1.7; color: var(--text-secondary); }
+  .detail-box .wcag-tag { display: inline-block; font-size: 11px; font-weight: 600; background: var(--bc-maroon); color: #fff; padding: 3px 10px; border-radius: var(--radius-md); margin-top: 8px; }
+  .detail-box .udl-tag { display: inline-block; font-size: 11px; font-weight: 600; background: var(--bc-gold-pale); color: #111111; border: 0.5px solid #e0c84a; padding: 3px 10px; border-radius: var(--radius-md); margin-top: 8px; margin-left: 4px; }
+
+  .divider { border: none; border-top: 0.5px solid var(--border); margin: 2rem 0; }
+
+  .principle-row { display: flex; gap: 12px; margin-bottom: 1rem; align-items: flex-start; }
+  .principle-num { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--bc-maroon); color: #fff; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  .principle-text h4 { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: var(--bc-maroon-dark); }
+  .principle-text p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+  .udl-box { background: var(--bc-maroon-light); border-radius: var(--radius-lg); border: 0.5px solid rgba(136,35,69,0.2); padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  .udl-box h3 { font-size: 17px; font-weight: 600; margin-bottom: 0.5rem; color: var(--bc-maroon-dark); }
+  .udl-box p { font-size: 14px; line-height: 1.7; color: var(--text-secondary); }
+  .udl-box .udl-tag { display: inline-block; font-size: 11px; font-weight: 600; background: var(--bc-gold-pale); color: #111111; border: 0.5px solid #e0c84a; padding: 3px 10px; border-radius: var(--radius-md); margin-top: 8px; }
+
+  .quote-block { border-left: 3px solid var(--bc-gold); padding-left: 1rem; margin: 1.5rem 0; }
+  .quote-block p { font-family: 'Lora', serif; font-style: italic; font-size: 15px; line-height: 1.7; color: var(--text-secondary); }
+
+  .tip-card { background: var(--bg-primary); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start; }
+  .tip-card .tip-icon { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--bc-maroon); color: #fff; font-size: 15px; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+  .tip-card .tip-body strong { font-size: 14px; font-weight: 600; color: var(--bc-maroon-dark); display: block; margin-bottom: 4px; }
+  .tip-card .tip-body p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+  .tab-bar { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .tab-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 16px; border: none; outline: none; background-color: #111111; color: #ffffff; cursor: pointer; border-radius: 6px; transition: background-color 0.15s; }
+  .tab-btn:hover, .tab-btn.active { background-color: #82786F; }
+  .tab-btn.active { font-weight: 600; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .callout { display: flex; gap: 12px; padding: 1rem 1.25rem; background: var(--bc-gold-pale); border-left: 3px solid var(--bc-gold); border-radius: 0 var(--radius-lg) var(--radius-lg) 0; margin-bottom: 1.5rem; align-items: flex-start; }
+  .callout i { font-size: 20px; color: #7a6000; flex-shrink: 0; margin-top: 2px; }
+  .callout p { font-size: 14px; line-height: 1.6; color: #111111; }
+  .callout strong { color: #111111; font-weight: 600; }
+  .callout a { color: var(--bc-maroon); }
+
+  @media (max-width: 540px) {
+    .spectrum-grid { grid-template-columns: repeat(2, 1fr); }
+    .tab-btn { font-size: 12px; padding: 7px 12px; }
+    .guide { padding: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+<div class="guide">
+
+  <div class="hero">
+    <div class="bc-wordmark">
+      <div class="bar"></div>
+      <div class="text">Brooklyn College AIT<br>Faculty Resource</div>
+    </div>
+    <h1>Accessibility isn't a checklist.<br>It's about helping all of your students.</h1>
+    <p>You probably already know that some students need accommodations. But the full picture is much wider — and a lot of what helps those students helps <em>everyone</em>. Let's dig in.</p>
+  </div>
+
+  <div class="tab-bar" role="tablist">
+    <button class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab('spectrum', this)">The spectrum of needs</button>
+    <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('wcag', this)">ADA Guidelines</button>
+    <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('udl', this)">UDL principles</button>
+    <button class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('action', this)">Did you know?</button>
+  </div>
+
+  <!-- SPECTRUM TAB -->
+  <div id="tab-spectrum" class="tab-panel active">
+    <p class="section-label">Who we're designing for</p>
+    <p class="spectrum-intro">Disability isn't binary. It's a spectrum — and it overlaps with temporary situations, context, and learning differences that affect far more students than you might think. Click any card to learn more.</p>
+    <div class="spectrum-grid">
+      <div class="spectrum-card" onclick="showDetail('vision', this)"><span class="icon" aria-hidden="true">👁</span><div class="card-title">Vision</div><div class="card-teaser">From blindness to low contrast sensitivity</div></div>
+      <div class="spectrum-card" onclick="showDetail('hearing', this)"><span class="icon" aria-hidden="true">👂</span><div class="card-title">Hearing</div><div class="card-teaser">From deafness to auditory processing differences</div></div>
+      <div class="spectrum-card" onclick="showDetail('motor', this)"><span class="icon" aria-hidden="true">🖱</span><div class="card-title">Motor &amp; mobility</div><div class="card-teaser">From paralysis to a broken wrist</div></div>
+      <div class="spectrum-card" onclick="showDetail('cognitive', this)"><span class="icon" aria-hidden="true">🧠</span><div class="card-title">Cognitive &amp; learning</div><div class="card-teaser">ADHD, dyslexia, anxiety, ESL learners</div></div>
+      <div class="spectrum-card" onclick="showDetail('situational', this)"><span class="icon" aria-hidden="true">☀️</span><div class="card-title">Situational</div><div class="card-teaser">Bright screen, loud subway, crying baby</div></div>
+      <div class="spectrum-card" onclick="showDetail('chronic', this)"><span class="icon" aria-hidden="true">⚡</span><div class="card-title">Chronic &amp; fluctuating</div><div class="card-teaser">Chronic fatigue, migraines, chronic pain</div></div>
+    </div>
+    <div class="detail-box" id="detail-box"><p style="font-size:14px;color:#888">Click a card above to explore the full spectrum of needs</p></div>
+    <div class="quote-block"><p>"Designing for the edges benefits everyone in the middle. Curb cuts were designed for wheelchair users — and now benefit cyclists, parents with strollers, and delivery workers."</p></div>
+    <div class="callout"><i class="ti ti-bulb" aria-hidden="true"></i><p><strong>The numbers:</strong> About 1 in 5 adults has some form of disability — but many more experience situational or temporary limitations regularly. You have students in all of these groups, whether or not they've disclosed anything to you.</p></div>
+  </div>
+
+  <!-- ADA TAB -->
+  <div id="tab-wcag" class="tab-panel">
+    <p class="section-label">ADA guidelines — what they mean for your course materials</p>
+    <p class="spectrum-intro">The ADA requires that digital course materials be accessible to students with disabilities. The technical standard used to measure this is WCAG 2.2 AA — but you don't need to memorize the spec. Here's what it means in practice.</p>
+    <div class="principle-row"><div class="principle-num">1</div><div class="principle-text"><h4>Perceivable — can everyone access the content?</h4><p>Text alternatives for images (alt text). Captions for videos. Enough color contrast (4.5:1 for body text). Don't convey meaning with color alone — "the red items are due Friday" leaves colorblind students guessing.</p></div></div>
+    <div class="principle-row"><div class="principle-num">2</div><div class="principle-text"><h4>Operable — can everyone navigate it?</h4><p>Everything should work with a keyboard (not just a mouse). No time limits that can't be adjusted. No flashing content that could trigger seizures. Links should say where they go — "click here" tells nobody anything.</p></div></div>
+    <div class="principle-row"><div class="principle-num">3</div><div class="principle-text"><h4>Understandable — is the language clear?</h4><p>Use plain language where possible. Define abbreviations and jargon. Make sure forms and instructions are unambiguous. Structure your content with real headings — not just bold text.</p></div></div>
+    <div class="principle-row"><div class="principle-num">4</div><div class="principle-text"><h4>Robust — does it work with assistive technology?</h4><p>Use accessible document formats. In Brightspace, use the heading styles, not just visual styling. Export PDFs with proper tags. If you use a table, include header rows.</p></div></div>
+    <hr class="divider">
+    <p class="section-label">Two requirements that surprise people</p>
+    <div class="detail-box"><h3>Resize text</h3><p>Text should be readable when zoomed to 200% without losing content or functionality. Students with low vision routinely zoom their browsers. If your layout breaks at 200%, information gets lost.</p><span class="wcag-tag">WCAG 1.4.4 AA</span></div>
+    <div class="detail-box"><h3>Headings and labels</h3><p>Headings should describe the topic or purpose. A long document with no headings is extremely hard to navigate for screen reader users — and for anyone skim-reading, honestly.</p><span class="wcag-tag">WCAG 2.4.6 AA</span><span class="udl-tag">Also a UDL win</span></div>
+    <div class="callout"><i class="ti ti-school" aria-hidden="true"></i><p>CUNY has its own accessibility requirements and resources. Check the <strong><a href="https://www.cuny.edu/accessibility" target="_blank">CUNY Accessibility site</a></strong> for institutional guidance, templates, and support specific to our context.</p></div>
+  </div>
+
+  <!-- UDL TAB -->
+  <div id="tab-udl" class="tab-panel">
+    <p class="section-label">Universal Design for Learning</p>
+    <p class="spectrum-intro">UDL is a framework that asks us to build flexibility into how we teach — not retrofit accommodations after the fact. Think of it as designing a course that works for the widest possible range of learners from the start.</p>
+    <p style="font-size:14px;color:#555;margin-bottom:1.25rem;">Developed by <a href="https://www.cast.org/impact/universal-design-for-learning-udl" target="_blank" style="color:#882345;">CAST</a>, UDL has three core principles:</p>
+    <div class="udl-box"><h3>Multiple means of engagement</h3><p>Why are we learning this? Give students options for how they engage with the material and the course. Connect content to their interests. Offer choice in participation. Build in self-regulation supports.</p><span class="udl-tag">Addresses anxiety, attention, motivation</span></div>
+    <div class="udl-box"><h3>Multiple means of representation</h3><p>How is information presented? Offer content in more than one format — text + audio, visual + verbal. Activate prior knowledge. Build vocabulary explicitly. This isn't dumbing things down; it's widening the door.</p><span class="udl-tag">Addresses cognitive load, language barriers, sensory differences</span></div>
+    <div class="udl-box"><h3>Multiple means of action and expression</h3><p>How do students show what they know? Don't default to one format for all assessments. Some students write beautifully; others think better visually or verbally. Varying assessment types reveals more of what students actually know.</p><span class="udl-tag">Addresses motor, language, learning differences</span></div>
+    <div class="quote-block" style="margin-top:1.5rem;"><p>"The goal of UDL is not to make things easier — it's to remove unnecessary barriers while keeping appropriate challenges."</p></div>
+    <p style="font-size:14px;color:#555;line-height:1.7;margin-top:1rem;">The full UDL guidelines and practical classroom strategies live at <a href="https://www.cast.org" target="_blank" style="color:#882345;">cast.org</a>. It's genuinely useful browsing.</p>
+  </div>
+
+  <!-- DID YOU KNOW TAB -->
+  <div id="tab-action" class="tab-panel">
+    <p class="section-label">Did you know?</p>
+    <p class="spectrum-intro">Small changes to how you prepare course materials can make a real difference for a lot of students — not just those with documented disabilities.</p>
+    <div class="tip-card"><div class="tip-icon" aria-hidden="true"><i class="ti ti-photo"></i></div><div class="tip-body"><strong>Images without alt text are invisible to screen readers</strong><p>Did you know that a screen reader skips right over an image with no alt text? For a blind student, that chart or diagram simply doesn't exist. A single sentence of description changes everything.</p></div></div>
+    <div class="tip-card"><div class="tip-icon" aria-hidden="true"><i class="ti ti-heading"></i></div><div class="tip-body"><strong>Bold text isn't the same as a heading</strong><p>Did you know that screen readers navigate documents by heading structure, not visual formatting? Bold text looks like a heading but isn't one. Using real heading styles in Word or Brightspace takes seconds and makes a huge difference.</p></div></div>
+    <div class="tip-card"><div class="tip-icon" aria-hidden="true"><i class="ti ti-device-tv"></i></div><div class="tip-body"><strong>Captions help far more students than you'd expect</strong><p>Did you know that captions are used by students who are deaf or hard of hearing, non-native English speakers, students with auditory processing differences — and anyone studying somewhere they can't play audio? Auto-captions are a decent starting point.</p></div></div>
+    <div class="tip-card"><div class="tip-icon" aria-hidden="true"><i class="ti ti-palette"></i></div><div class="tip-body"><strong>About 1 in 12 men has some form of color blindness</strong><p>Did you know that if you use color alone to convey meaning — red for late work, green for correct — a significant portion of your students can't reliably see that distinction? Pair color with a label, icon, or pattern.</p></div></div>
+    <div class="tip-card"><div class="tip-icon" aria-hidden="true"><i class="ti ti-file-type-pdf"></i></div><div class="tip-body"><strong>"Print to PDF" creates an inaccessible document</strong><p>Did you know that a PDF created by printing to PDF is essentially a flat image? Screen readers can't read it, and it can't be reflowed for small screens. Exporting as a tagged PDF from Word or Google Docs takes one extra click.</p></div></div>
+    <div class="tip-card"><div class="tip-icon" aria-hidden="true"><i class="ti ti-keyboard"></i></div><div class="tip-body"><strong>Not everyone can use a mouse</strong><p>Did you know that students with motor disabilities, repetitive strain injuries, or tremors often navigate entirely by keyboard? If your course content or linked tools aren't keyboard-navigable, those students may be locked out entirely.</p></div></div>
+    <div class="tip-card"><div class="tip-icon" aria-hidden="true"><i class="ti ti-writing"></i></div><div class="tip-body"><strong>A quiz isn't the only way to show mastery</strong><p>Did you know that over-relying on a single format — like selected-response tests or papers — systematically disadvantages students with a range of disabilities and learning differences? Evaluating learning through varied formats gives all students a genuine opportunity to demonstrate what they know.</p></div></div>
+    <div class="tip-card"><div class="tip-icon" aria-hidden="true"><i class="ti ti-layout-grid"></i></div><div class="tip-body"><strong>Multimodal content reaches more learners</strong><p>Did you know that presenting the same idea in multiple formats — text, diagram, audio, example — isn't redundant, it's inclusive? Students process information differently. A concept that clicks for one student as a written explanation might only land for another through a visual or a worked example. Offering both costs little and gains a lot.</p></div></div>
+    <div class="callout" style="margin-top:1.5rem;"><i class="ti ti-link" aria-hidden="true"></i><p>For more practical strategies grounded in UDL, visit <strong><a href="https://www.cast.org" target="_blank">cast.org</a></strong>. For CUNY-specific requirements and templates, check <strong><a href="https://www.cuny.edu/accessibility" target="_blank">cuny.edu/accessibility</a></strong>.</p></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+var details = {
+  vision: {
+    title: "Vision — a wide spectrum",
+    body: "Blindness is the extreme end. Far more common: low vision, contrast sensitivity, colorblindness (~8% of men), age-related changes. Even students with normal vision may be reading on a low-brightness phone screen in bright sunlight.",
+    wcag: "WCAG 1.4.1, 1.4.3, 1.4.11",
+    udl: "Multiple means of representation"
+  },
+  hearing: {
+    title: "Hearing — more than deafness",
+    body: "Hard-of-hearing students, students with auditory processing disorders, non-native English speakers who rely on reading lips or text. Also: anyone watching a video at the library without headphones.",
+    wcag: "WCAG 1.2.2 (captions), 1.2.3",
+    udl: "Multiple means of representation"
+  },
+  motor: {
+    title: "Motor and mobility — beyond wheelchairs",
+    body: "Students who cannot use a mouse (keyboard-only navigation). Students with tremors, repetitive strain, or a broken arm. Carpal tunnel from too much typing. These students need keyboard-navigable content and enough time to complete tasks.",
+    wcag: "WCAG 2.1.1 (keyboard access)",
+    udl: "Multiple means of action"
+  },
+  cognitive: {
+    title: "Cognitive and learning — the largest group",
+    body: "ADHD, dyslexia, and anxiety are the most common learning differences on campus — and most students who have them have never been formally diagnosed. ESL/multilingual learners are also in this group. Clear structure, plain language, and predictable layouts help all of them.",
+    wcag: "WCAG 2.4.6 (headings), 3.1.5",
+    udl: "All three principles"
+  },
+  situational: {
+    title: "Situational — temporary and contextual",
+    body: "Watching a lecture video on the train (no audio). Reading slides on a phone in sunlight (contrast issues). Studying with a newborn in the room (cognitive load). These situations are universal and temporary — and the solutions are the same as for permanent disabilities.",
+    wcag: "WCAG 1.2.2, 1.4.3",
+    udl: "Multiple means of engagement"
+  },
+  chronic: {
+    title: "Chronic and fluctuating conditions",
+    body: "Students with chronic fatigue, migraines, lupus, MS, or chronic pain have good days and bad days. They may not disclose, and their needs may vary week to week. Flexibility in deadlines and participation modes matters enormously for this group.",
+    wcag: "WCAG 2.2.1 (adjustable timing)",
+    udl: "Multiple means of engagement"
+  }
+};
+
+function showDetail(key, el) {
+  var d = details[key];
+  var box = document.getElementById('detail-box');
+  var html = '<h3>' + d.title + '</h3>';
+  html += '<p style="margin-top:6px">' + d.body + '</p>';
+  html += '<span class="wcag-tag">' + d.wcag + '</span>';
+  html += '<span class="udl-tag">' + d.udl + '</span>';
+  box.innerHTML = html;
+  var cards = document.querySelectorAll('.spectrum-card');
+  for (var i = 0; i < cards.length; i++) {
+    cards[i].classList.remove('active');
+  }
+  el.classList.add('active');
+}
+
+function switchTab(name, btn) {
+  var panels = document.querySelectorAll('.tab-panel');
+  for (var i = 0; i < panels.length; i++) {
+    panels[i].classList.remove('active');
+  }
+  var buttons = document.querySelectorAll('.tab-btn');
+  for (var j = 0; j < buttons.length; j++) {
+    buttons[j].classList.remove('active');
+    buttons[j].setAttribute('aria-selected', 'false');
+  }
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  btn.setAttribute('aria-selected', 'true');
+}
+</script>
+</body>
+</html>
