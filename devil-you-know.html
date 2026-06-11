@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session Resources — The Devil You Know: Empowering Faculty with Practical AI Pedagogy Know-How</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bc-maroon: #882345;
+    --bc-maroon-dark: #621933;
+    --bc-maroon-light: #f5e8ed;
+    --bc-gold: #EBB700;
+    --bc-gold-pale: #fef9e6;
+    --bc-gold-dark: #a07d00;
+    --bc-gray: #82786F;
+    --bc-gray-light: #f2f0ef;
+    --text-primary: #111111;
+    --text-secondary: #555555;
+    --border: rgba(0,0,0,0.12);
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f8f7;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+
+  body { font-family: 'DM Sans', sans-serif; color: var(--text-primary); background: #f4f3f1; min-height: 100vh; padding: 2rem 1rem; }
+  .page-wrap { max-width: 680px; margin: 0 auto; }
+  .guide { background: var(--bg-primary); border-radius: 16px; padding: 2rem; box-shadow: 0 2px 16px rgba(0,0,0,0.08); }
+
+  /* Hero */
+  .hero { background: var(--bc-maroon); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; }
+  .hero h1 { font-family: 'Lora', serif; font-size: 20px; font-weight: 600; line-height: 1.35; margin-bottom: 0.5rem; color: #fff; }
+  .hero h1 .title-sub { display: block; font-size: 16px; font-weight: 400; font-style: italic; color: rgba(255,255,255,0.82); margin-top: 3px; }
+  .hero .presenter-block { margin-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 0.65rem; }
+  .hero .presenter-name { font-size: 15px; font-weight: 600; color: #fff; display: block; }
+  .hero .presenter-title { font-size: 12px; color: rgba(255,255,255,0.6); display: block; margin-top: 2px; }
+  .hero .presenter-school { font-size: 14px; font-weight: 600; color: var(--bc-gold); display: block; margin-top: 4px; }
+
+  /* BC Wordmark */
+  .bc-wordmark { display: flex; align-items: center; gap: 8px; margin-bottom: 0.85rem; }
+  .bc-wordmark .bar { width: 3px; height: 26px; background: var(--bc-gold); border-radius: 2px; flex-shrink: 0; }
+  .bc-wordmark .text { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.6); line-height: 1.4; letter-spacing: 0.03em; text-transform: uppercase; }
+
+  /* Conference link */
+  .conference-link {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--bc-gold);
+    text-decoration: none;
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .conference-link:hover { text-decoration: underline; }
+
+  /* Gold pill label */
+  .session-pill {
+    display: inline-block;
+    background: var(--bc-gold);
+    color: #5a4000;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 0.6rem;
+  }
+
+  /* Section label */
+  .section-label { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-primary); margin-bottom: 1.25rem; }
+
+  /* AI Playground | Escambia teaser cards */
+  .playground-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 2rem; }
+  .playground-card {
+    background: var(--bc-gold-pale);
+    border: 0.5px solid rgba(235,183,0,0.4);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.25rem;
+  }
+  .playground-card .pg-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bc-gold-dark);
+    margin-bottom: 0.4rem;
+  }
+  .playground-card .pg-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+  }
+  .playground-card .pg-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--bc-maroon-dark);
+    margin-bottom: 0.4rem;
+  }
+  .playground-card .pg-time i { font-size: 16px; color: var(--bc-gold-dark); font-weight: 400; }
+  .playground-card .pg-date {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--bc-gray);
+    margin-bottom: 0.4rem;
+  }
+  .playground-card .pg-date i { font-size: 12px; }
+  .playground-card .pg-coming {
+    font-size: 12px;
+    color: var(--bc-gold-dark);
+    font-style: italic;
+  }
+
+  @media (max-width: 460px) {
+    .playground-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Resource cards */
+  .resource-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .resource-card {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    background: var(--bg-primary);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.25rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  }
+  .resource-card:hover {
+    border-color: var(--bc-maroon);
+    background: var(--bc-maroon-light);
+    box-shadow: 0 2px 10px rgba(136,35,69,0.1);
+  }
+  .resource-card:focus {
+    outline: 2px solid var(--bc-maroon);
+    outline-offset: 2px;
+  }
+
+  .resource-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bc-maroon);
+    color: #fff;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .resource-body { flex: 1; min-width: 0; }
+  .resource-title { font-size: 15px; font-weight: 600; color: var(--bc-maroon-dark); line-height: 1.4; }
+
+  .resource-arrow {
+    flex-shrink: 0;
+    font-size: 16px;
+    color: var(--bc-maroon);
+    opacity: 0.4;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .resource-card:hover .resource-arrow {
+    opacity: 1;
+    transform: translateX(3px);
+  }
+
+  /* Divider */
+  .divider { border: none; border-top: 0.5px solid var(--border); margin: 1.75rem 0; }
+
+  /* Contact card */
+  .contact-card {
+    background: var(--bc-maroon-light);
+    border: 0.5px solid rgba(136,35,69,0.2);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+  }
+  .contact-heading {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--bc-maroon-dark);
+    margin-bottom: 0.9rem;
+  }
+  .contact-links { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .contact-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--bc-maroon-dark);
+    padding: 0.65rem 0.75rem;
+    background: #fff;
+    border: 0.5px solid rgba(136,35,69,0.18);
+    border-radius: var(--radius-md);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .contact-link:hover { background: var(--bc-maroon); color: #fff; border-color: var(--bc-maroon); }
+  .contact-link:hover i { color: #fff; }
+  .contact-link:focus { outline: 2px solid var(--bc-maroon); outline-offset: 2px; }
+  .contact-link i { font-size: 26px; color: var(--bc-maroon); transition: color 0.15s; }
+  .contact-link span { font-size: 11px; font-weight: 500; line-height: 1.4; word-break: break-all; }
+
+  /* Footer */
+  .page-footer { text-align: center; margin-top: 1.5rem; font-size: 13px; color: var(--bc-gray); }
+
+  @media (max-width: 500px) {
+    .guide { padding: 1.25rem; }
+    .hero { padding: 1rem 1.1rem; }
+    .hero h1 { font-size: 18px; }
+    .resource-card { padding: 1rem 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <div class="guide">
+
+    <div class="hero">
+      <a class="conference-link" href="https://aiforall.ucf.edu/teachwithai/" target="_blank" rel="noopener noreferrer">UCF Teaching &amp; Learning with AI Conference &middot; Orlando, FL &middot; June 11&ndash;13, 2026</a>
+      <span class="session-pill">Session Resources</span>
+      <h1>The Devil You Know:<span class="title-sub">Empowering Faculty with Practical AI Pedagogy Know-How</span></h1>
+      <div class="presenter-block">
+        <span class="presenter-name">Mariya Gluzman</span>
+        <span class="presenter-title">Instructional Designer/Lecturer</span>
+        <span class="presenter-school">Brooklyn College, CUNY</span>
+      </div>
+    </div>
+
+    <p class="section-label">Come play with me on Friday at the AI Playground!</p>
+    <div class="playground-grid">
+
+      <div class="playground-card">
+        <div class="pg-label">AI Playground | Escambia</div>
+        <div class="pg-title">NotebookLM</div>
+        <div class="pg-time"><i class="ti ti-clock" aria-hidden="true"></i> 10:20 AM</div>
+        <div class="pg-date"><i class="ti ti-calendar" aria-hidden="true"></i> Friday, June 12</div>
+
+      </div>
+
+      <div class="playground-card">
+        <div class="pg-label">AI Playground | Escambia</div>
+        <div class="pg-title">Claude Code</div>
+        <div class="pg-time"><i class="ti ti-clock" aria-hidden="true"></i> 2:20 PM</div>
+        <div class="pg-date"><i class="ti ti-calendar" aria-hidden="true"></i> Friday, June 12</div>
+
+      </div>
+
+    </div>
+
+    <p class="section-label">Session Resources</p>
+
+    <div class="resource-list">
+
+      <a class="resource-card"
+         href="https://cuny907-my.sharepoint.com/:b:/g/personal/mariya_gluzman87_login_cuny_edu/IQAYUNzbvbuzRY7OsfJCaZkFAejOGUxQfYgvGyv6j_e3Kxs?e=sSr8Pr"
+         target="_blank" rel="noopener noreferrer"
+         aria-label="Presentation Slides (opens in new tab)">
+        <div class="resource-icon"><i class="ti ti-presentation" aria-hidden="true"></i></div>
+        <div class="resource-body">
+          <div class="resource-title">Presentation Slides</div>
+        </div>
+        <i class="ti ti-arrow-right resource-arrow" aria-hidden="true"></i>
+      </a>
+
+      <a class="resource-card"
+         href="https://tinyurl.com/HumAudit"
+         target="_blank" rel="noopener noreferrer"
+         aria-label="Human Learning Self-Audit Form (opens in new tab)">
+        <div class="resource-icon"><i class="ti ti-clipboard-check" aria-hidden="true"></i></div>
+        <div class="resource-body">
+          <div class="resource-title">Human Learning Self-Audit Form</div>
+        </div>
+        <i class="ti ti-arrow-right resource-arrow" aria-hidden="true"></i>
+      </a>
+
+      <a class="resource-card"
+         href="https://cuny907-my.sharepoint.com/:b:/g/personal/mariya_gluzman87_login_cuny_edu/IQAySwW2oArBRqePaeUqKIBaARgi3PF6Pj4aW337lwq8Wb4?e=juRVSz"
+         target="_blank" rel="noopener noreferrer"
+         aria-label="Cognitive Wrapper Info Page (opens in new tab)">
+        <div class="resource-icon"><i class="ti ti-brain" aria-hidden="true"></i></div>
+        <div class="resource-body">
+          <div class="resource-title">Cognitive Wrapper Info Page</div>
+        </div>
+        <i class="ti ti-arrow-right resource-arrow" aria-hidden="true"></i>
+      </a>
+
+      <a class="resource-card"
+         href="https://tinyurl.com/GUprompt"
+         target="_blank" rel="noopener noreferrer"
+         aria-label="Assignment Glow-Up Prompt Template (opens in new tab)">
+        <div class="resource-icon"><i class="ti ti-wand" aria-hidden="true"></i></div>
+        <div class="resource-body">
+          <div class="resource-title">Assignment Glow-Up Prompt Template</div>
+        </div>
+        <i class="ti ti-arrow-right resource-arrow" aria-hidden="true"></i>
+      </a>
+
+    </div>
+
+    <hr class="divider">
+
+    <div class="contact-card">
+      <p class="contact-heading">Get in Touch</p>
+      <div class="contact-links">
+        <a class="contact-link" href="mailto:mgluzman@brooklyn.cuny.edu" aria-label="Email Mariya Gluzman">
+          <i class="ti ti-mail" aria-hidden="true"></i>
+          <span>mgluzman@brooklyn.cuny.edu</span>
+        </a>
+        <a class="contact-link" href="https://www.linkedin.com/in/mariyagluzman" target="_blank" rel="noopener noreferrer" aria-label="Mariya Gluzman on LinkedIn (opens in new tab)">
+          <i class="ti ti-brand-linkedin" aria-hidden="true"></i>
+          <span>linkedin.com/in/mariyagluzman</span>
+        </a>
+      </div>
+    </div>
+
+    <p class="page-footer"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer" style="color:inherit;">CC BY-NC-SA 4.0</a> &middot; <a href="mailto:mgluzman@brooklyn.cuny.edu" style="color:inherit;">Mariya Gluzman</a></p>
+
+  </div>
+</div>
+</body>
+</html>
