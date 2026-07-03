@@ -54,7 +54,7 @@
     --radius-lg: 18px;
   }
 
-  html { background: var(--paper); }
+  html { background: var(--paper); scroll-behavior: smooth; }
   body {
     font-family: 'DM Sans', sans-serif;
     background: var(--paper);
@@ -65,32 +65,62 @@
 
   .wrap { max-width: 900px; margin: 0 auto; padding: clamp(1.25rem, 4vw, 2.75rem) 1.1rem 3.5rem; }
 
-  /* ---- Announcement (temporary) ---- */
-  .announce-bar {
+  /* ---- Floating register button ---- */
+  .register-fab {
+    position: fixed; z-index: 40;
+    right: clamp(1rem, 4vw, 2rem); bottom: clamp(1rem, 4vw, 2rem);
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: var(--maroon-dark);
     background: var(--gold-fill);
-    color: var(--maroon-dark);
-    font-family: 'Lora', serif;
-    font-style: italic;
-    font-weight: 600;
-    font-size: clamp(19px, 3.4vw, 27px);
-    line-height: 1.3;
-    text-align: center;
-    text-wrap: balance;
-    border-radius: var(--radius-md);
-    padding: 0.9rem 1.25rem;
-    margin-bottom: 1.1rem;
+    border-radius: 999px;
+    padding: 12px 20px;
+    text-decoration: none;
+    box-shadow: 0 4px 16px rgba(28,22,19,0.28);
+    transition: transform 0.1s, box-shadow 0.15s;
   }
+  .register-fab:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(28,22,19,0.34); }
+  .register-fab:focus-visible { outline: 2px solid var(--maroon-dark); outline-offset: 2px; }
+
+  /* ---- Register bar ---- */
+  .register-bar {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem 0.9rem;
+    background: rgba(0,0,0,0.16);
+    border-top: 1px solid rgba(255,255,255,0.2);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    margin: 1.1rem clamp(-2.25rem, -4vw, -1.5rem) clamp(-1.75rem, -3vw, -1.25rem);
+    padding: 0.65rem clamp(1.5rem, 4vw, 2.25rem);
+  }
+  .register-bar .label {
+    font-size: 15px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--gold-fill); flex-shrink: 0;
+  }
+  .register-bar .links { display: flex; flex-wrap: wrap; gap: 0.5rem 0.7rem; }
+  .register-bar a { font-size: 13px; border: 2px solid rgba(255,255,255,0.45); }
 
   /* ---- Hero ---- */
   .hero {
     background: var(--maroon);
     border-radius: var(--radius-lg);
-    padding: clamp(1.75rem, 4vw, 2.75rem) clamp(1.5rem, 4vw, 2.25rem);
+    padding: clamp(1.25rem, 3vw, 1.75rem) clamp(1.5rem, 4vw, 2.25rem);
     color: #fff;
   }
-  .wordmark { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
-  .wordmark .bar { width: 4px; height: 38px; background: var(--gold-fill); border-radius: 2px; flex-shrink: 0; }
-  .wordmark .text { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.72); line-height: 1.5; }
+  .wordmark { display: flex; align-items: center; flex-wrap: wrap; row-gap: 10px; gap: 12px; margin-bottom: 1.5rem; }
+  .wordmark .bar { width: 4px; height: 16px; background: var(--gold-fill); border-radius: 2px; flex-shrink: 0; }
+  .wordmark .text { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.72); line-height: 1.1; }
+  .jump-cal { margin-left: auto; flex-shrink: 0; font-size: 12px; letter-spacing: 0.02em; border: 1px solid rgba(255,255,255,0.32); }
+
+  /* Shared translucent pill link, used in the hero for jump-cal and register-bar links */
+  .jump-cal, .register-bar a {
+    display: inline-flex; align-items: center;
+    font-weight: 600; color: #fff;
+    background: rgba(255,255,255,0.12);
+    border-radius: 999px;
+    padding: 6px 14px;
+    text-decoration: none;
+    transition: transform 0.1s, box-shadow 0.15s, background 0.15s;
+  }
+  .jump-cal:hover, .register-bar a:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.2); background: rgba(255,255,255,0.2); }
+  .jump-cal:focus-visible, .register-bar a:focus-visible { outline: 2px solid var(--gold-fill); outline-offset: 2px; }
 
   .hero h1 {
     font-family: 'Lora', serif;
@@ -184,7 +214,7 @@
   .card.dimmed { opacity: 0.3; }
 
   /* ---- Details ---- */
-  .details { background: var(--card); border: 1px solid var(--hairline); border-radius: var(--radius-lg); padding: 1.75rem clamp(1.25rem, 4vw, 1.85rem) 1.5rem; min-height: 130px; }
+  .details { background: var(--card); border: 1px solid var(--hairline); border-radius: var(--radius-lg); padding: 1rem clamp(1.25rem, 4vw, 1.85rem); }
   .details-prompt { color: var(--ink-soft); font-size: 14px; line-height: 1.6; }
   .details-intro { font-size: 14px; line-height: 1.7; color: var(--ink-soft); padding-bottom: 1rem; margin-bottom: 1.15rem; border-bottom: 1px solid var(--hairline); }
   .details-head { display: flex; align-items: center; gap: 10px; margin-bottom: 0.9rem; }
@@ -200,6 +230,8 @@
   .detail-entry p.none { font-size: 13px; font-style: italic; color: var(--ink-soft); }
 
   footer.foot { margin-top: 2.5rem; text-align: center; font-size: 12px; color: var(--ink-soft); line-height: 1.6; }
+  footer.foot a { color: var(--maroon); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+  footer.foot a:hover { color: var(--maroon-dark); }
 
   /* ---- Event modal ---- */
   .modal-overlay {
@@ -231,6 +263,14 @@
   .modal #modalBody p.none { font-size: 13.5px; font-style: italic; color: var(--ink-soft); }
   .modal-source { margin-top: 1.1rem; padding-top: 0.85rem; border-top: 1px solid var(--hairline); font-size: 11.5px; color: var(--ink-soft); }
   .modal-source[hidden] { display: none; }
+  .modal-link {
+    display: inline-block; margin-top: 0.9rem;
+    font: inherit; font-size: 13px; font-weight: 700; color: var(--faculty-dark);
+    background: none; border: none; padding: 0; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 2px;
+  }
+  .modal-link:hover { color: var(--faculty); }
+  .modal-link:focus-visible { outline: 2px solid var(--maroon); outline-offset: 2px; }
 
   /* ---- Clinic schedule modal ---- */
   .clinic-modal { max-width: 780px; border-top-color: var(--faculty); }
@@ -266,17 +306,19 @@
 
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; animation: none !important; }
+    html { scroll-behavior: auto; }
   }
 </style>
 
-<div class="wrap">
+<a class="register-fab" href="#registration">Register Now!</a>
 
-  <p class="announce-bar">Registration Opens July 3</p>
+<div class="wrap">
 
   <header class="hero">
     <div class="wordmark">
       <span class="bar" aria-hidden="true"></span>
-      <span class="text">Brooklyn College Academic IT<br>AI in July 2026</span>
+      <span class="text">Brooklyn College Academic IT</span>
+      <a class="jump-cal" href="#calendar">Jump to Calendar ↓</a>
     </div>
     <h1>AI in July</h1>
     <h2>Hands-on AI Skills Training for Faculty &amp; Staff</h2>
@@ -290,10 +332,18 @@
         <p><strong>Microsoft engineers are joining us in person</strong> to lead two live sessions of the Hands-on Copilot Workshop for Staff, July 21 in Library 383.<span class="cta">See session details →</span></p>
       </button>
     </div>
+    <div class="register-bar" id="registration">
+      <span class="label">Register for:</span>
+      <div class="links">
+        <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=s_BgbwZfCU6XFZiduozH2BgcHMZblX5NlvO7Aju7M59UNjNJNUJUTTM5Q1JKOElIWk0wRU9NREZITy4u" target="_blank" rel="noopener">Live Microsoft Training</a>
+        <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=s_BgbwZfCU6XFZiduozH2BgcHMZblX5NlvO7Aju7M59UREVVVUxFTEJVNjhMUDFIMERES0pTTTVMOC4u" target="_blank" rel="noopener">Staff Virtual Events</a>
+        <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=s_BgbwZfCU6XFZiduozH2BgcHMZblX5NlvO7Aju7M59UM1IySzBMUk9FWkU2OVBSSTJOS1pSMUlZVC4u" target="_blank" rel="noopener">Faculty Virtual Events</a>
+        <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=s_BgbwZfCU6XFZiduozH2BgcHMZblX5NlvO7Aju7M59UNzdURE9TSTQ3NlI2REJTN0hRRFVHM0JFSy4u" target="_blank" rel="noopener">Faculty AI Coworking Clinic</a>
+      </div>
+    </div>
   </header>
 
   <section class="legend-section" aria-label="Event categories">
-    <p class="eyebrow">Who is it for?</p>
     <div class="legend" role="group" aria-label="Filter by audience">
       <button class="legend-pill" type="button" data-cat="faculty" aria-pressed="false">
         Faculty Events<span class="count" id="count-faculty"></span>
@@ -308,7 +358,7 @@
     <p class="legend-hint">Select a category to see full descriptions below, or click any session on the calendar.</p>
   </section>
 
-  <section class="calendar" aria-label="July 2026 calendar">
+  <section class="calendar" id="calendar" aria-label="July 2026 calendar">
     <div class="cal-head" aria-hidden="true">
       <span>Monday</span><span>Tuesday</span><span>Wednesday</span><span>Thursday</span>
     </div>
@@ -318,7 +368,8 @@
   <section class="details" id="detailsPanel" aria-live="polite"></section>
 
   <footer class="foot">
-    <p>AI in July 2026 · Brooklyn College Academic Innovation &amp; Technology<br>Compiled from the official Faculty and Staff virtual schedules and the published event calendar.</p>
+    <p>AI in July 2026 · Brooklyn College Academic IT<br>This page was generated by <a href="mailto:mgluzman@brooklyn.cuny.edu">Mariya Gluzman</a> using Claude Code in Visual Studio.</p>
+    <p>Questions about the events or this page? Contact <a href="mailto:mgluzman@brooklyn.cuny.edu">Mariya Gluzman</a>.</p>
   </footer>
 
 </div>
@@ -483,6 +534,7 @@
     staff: "Source: AI in July-Staff Virtual Schedule.docx"
   };
   var eventModal = createModal(document.getElementById("modalOverlay"), document.getElementById("modalClose"));
+  var CLINIC_DAY_IDS = ["faculty-8", "faculty-9", "faculty-10"];
 
   function openModal(ev, trigger) {
     modalEl.className = "modal cat-" + ev.category;
@@ -493,6 +545,16 @@
 
     modalBody.innerHTML = "";
     modalBody.appendChild(buildOverviewNode(ev));
+
+    if (CLINIC_DAY_IDS.indexOf(ev.id) !== -1) {
+      var clinicLink = el("button", "modal-link", "Learn more about the clinic →");
+      clinicLink.type = "button";
+      clinicLink.addEventListener("click", function () {
+        eventModal.close();
+        clinicModal.open(clinicLink);
+      });
+      modalBody.appendChild(clinicLink);
+    }
 
     modalSource.hidden = !SOURCE_DOC[ev.source];
     modalSource.textContent = SOURCE_DOC[ev.source] || "";
@@ -616,7 +678,7 @@
     var panel = document.getElementById("detailsPanel");
     panel.innerHTML = "";
     if (!activeCat) {
-      panel.appendChild(el("p", "details-prompt", "Select a category above to see full session details — descriptions, formats, and locations — pulled directly from the official schedule documents."));
+      panel.appendChild(el("p", "details-prompt", "Click on an event to see its session description, or click a category above for additional info."));
       return;
     }
     var head = el("div", "details-head");
